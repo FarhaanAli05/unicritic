@@ -5,73 +5,129 @@ import axios from 'axios';
 import Image from "next/image";
 
 export default function Home() {
-  interface OMDbData {
-    Title: string,
-    Year: string,
-    Rated: string,
-    Released: string,
-    Runtime: string,
-    Genre: string,
-    Director: string,
-    Writer: string,
-    Actors: string,
-    Plot: string,
-    Language: string,
-    Country: string,
-    Awards: string,
-    Poster: string,
-    Ratings: {
-      Source: string,
-      Value: string
+  interface tmdbResults {
+    page: number,
+    results: {
+      adult: boolean,
+      backdrop_path: string,
+      genre_ids: [
+        number
+      ],
+      id: number,
+      original_language: string,
+      origingal_title: string,
+      overview: string,
+      popularity: number,
+      poster_path: string,
+      release_date: string,
+      title: string,
+      video: boolean,
+      vote_average: number,
+      vote_count: number
     }[],
-    Metascore: string,
-    imdbRating: string,
-    imdbVotes: string,
-    imdbID: string,
-    Type: string,
-    DVD: string,
-    BoxOffice: string,
-    Production: string,
-    Website: string,
-    Response: string
+    total_pages: number,
+    total_results: number
   };
 
-  const emptyMovie: OMDbData = {
-    Title: '',
-    Year: '',
-    Rated: '',
-    Released: '',
-    Runtime: '',
-    Genre: '',
-    Director: '',
-    Writer: '',
-    Actors: '',
-    Plot: '',
-    Language: '',
-    Country: '',
-    Awards: '',
-    Poster: '',
-    Ratings: [],
-    Metascore: '',
-    imdbRating: '',
-    imdbVotes: '',
-    imdbID: '',
-    Type: '',
-    DVD: '',
-    BoxOffice: '',
-    Production: '',
-    Website: '',
-    Response: ''
-  };
+  // interface OMDbData {
+  //   Title: string,
+  //   Year: string,
+  //   Rated: string,
+  //   Released: string,
+  //   Runtime: string,
+  //   Genre: string,
+  //   Director: string,
+  //   Writer: string,
+  //   Actors: string,
+  //   Plot: string,
+  //   Language: string,
+  //   Country: string,
+  //   Awards: string,
+  //   Poster: string,
+  //   Ratings: {
+  //     Source: string,
+  //     Value: string
+  //   }[],
+  //   Metascore: string,
+  //   imdbRating: string,
+  //   imdbVotes: string,
+  //   imdbID: string,
+  //   Type: string,
+  //   DVD: string,
+  //   BoxOffice: string,
+  //   Production: string,
+  //   Website: string,
+  //   Response: string
+  // };
 
-  const [data, setData] = useState<OMDbData>(emptyMovie);
+  // const emptyMovie: OMDbData = {
+  //   Title: '',
+  //   Year: '',
+  //   Rated: '',
+  //   Released: '',
+  //   Runtime: '',
+  //   Genre: '',
+  //   Director: '',
+  //   Writer: '',
+  //   Actors: '',
+  //   Plot: '',
+  //   Language: '',
+  //   Country: '',
+  //   Awards: '',
+  //   Poster: '',
+  //   Ratings: [],
+  //   Metascore: '',
+  //   imdbRating: '',
+  //   imdbVotes: '',
+  //   imdbID: '',
+  //   Type: '',
+  //   DVD: '',
+  //   BoxOffice: '',
+  //   Production: '',
+  //   Website: '',
+  //   Response: ''
+  // };
+
+  const [data, setData] = useState({});
+  const [results, setResults] = useState<tmdbResults>({});
   const [search, setSearch] = useState("");
+  const [imgUrl, setImgUrl] = useState("");
+  // const [genres, setGenres] = useState<string[]>([]);
 
-  const apiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
+  // const apiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
 
-  const fetchData = async (search: string) => {
-    const response = await axios.get(`https://www.omdbapi.com/?t=${search}&apikey=${apiKey}`);
+  const tmdbApiKey = process.env.NEXT_PUBLIC_TMDb_API_KEY;
+
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1
+  });
+
+  useEffect(() => {
+    console.log('results updated');
+    const firstResult = results.results[0];
+    fetchData(firstResult);
+  }, [results]);
+
+  useEffect(() => {
+    fetchImage(data);
+  }, [data]);
+
+  const fetchResults = async (search: string) => {
+    const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${search}`);
+    setResults(response.data);
+  };
+
+  const fetchData = async (result) => {
+    const id = result.id;
+    const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}&append_to_response=credits`);
     setData(response.data);
+  };
+
+  const fetchImage = async (data) => {
+    const response = axios.get(`https://image.tmdb.org/t/p/w500/${data.poster_path}`); // in production, set width to "original"
+    setImgUrl(response.data);
   };
 
   // const isImgValid = (url: string) => {
@@ -104,11 +160,11 @@ export default function Home() {
         }} onKeyDown={(e) => {
           if (e.key === "Enter") {
             setSearch(search.replace(" ", "+"));
-            fetchData(search);
+            fetchResults(search);
           }
         }} />
       </div>
-      {data.Title &&
+      {data.original_title &&
         <>
           <div>
             <div>
@@ -132,6 +188,10 @@ export default function Home() {
               <div>
                 <h1>68%</h1>
               </div>
+              <div>
+                <span>{data.Plot}</span>
+              </div>
+              <div></div>
             </div>
           </div>
           <div>
@@ -141,16 +201,30 @@ export default function Home() {
                 <li>Ratings</li>
               </ul>
             </nav>
-            <div>
-              <Image
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                alt="Review Site Logo"
-                width={100}
-                height={100}
-                priority
-              />
-              <span>IMDb: 7/10 from 78k ratings</span>
-            </div>
+            {data.imdbRating !== "N/A" &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                  alt="IMDb Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>IMDb: {data.imdbRating}/10 from {formatter.format(Number(data.imdbVotes))} ratings</span>
+              </div>
+            }
+            {data.Metascore !== "N/A" &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                  alt="Metacritic Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Metacritic: {data.Metascore}%</span>
+              </div>
+            }
           </div>
         </>
       }
