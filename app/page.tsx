@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Image from "next/image";
 
@@ -29,115 +29,157 @@ export default function Home() {
     total_results: number
   };
 
-  // interface OMDbData {
-  //   Title: string,
-  //   Year: string,
-  //   Rated: string,
-  //   Released: string,
-  //   Runtime: string,
-  //   Genre: string,
-  //   Director: string,
-  //   Writer: string,
-  //   Actors: string,
-  //   Plot: string,
-  //   Language: string,
-  //   Country: string,
-  //   Awards: string,
-  //   Poster: string,
-  //   Ratings: {
-  //     Source: string,
-  //     Value: string
-  //   }[],
-  //   Metascore: string,
-  //   imdbRating: string,
-  //   imdbVotes: string,
-  //   imdbID: string,
-  //   Type: string,
-  //   DVD: string,
-  //   BoxOffice: string,
-  //   Production: string,
-  //   Website: string,
-  //   Response: string
-  // };
+  interface OMDbData {
+    Title: string,
+    Year: string,
+    Rated: string,
+    Released: string,
+    Runtime: string,
+    Genre: string,
+    Director: string,
+    Writer: string,
+    Actors: string,
+    Plot: string,
+    Language: string,
+    Country: string,
+    Awards: string,
+    Poster: string,
+    Ratings: {
+      Source: string,
+      Value: string
+    }[],
+    Metascore: string,
+    imdbRating: string,
+    imdbVotes: string,
+    imdbID: string,
+    Type: string,
+    DVD: string,
+    BoxOffice: string,
+    Production: string,
+    Website: string,
+    Response: string
+  };
 
-  // const emptyMovie: OMDbData = {
-  //   Title: '',
-  //   Year: '',
-  //   Rated: '',
-  //   Released: '',
-  //   Runtime: '',
-  //   Genre: '',
-  //   Director: '',
-  //   Writer: '',
-  //   Actors: '',
-  //   Plot: '',
-  //   Language: '',
-  //   Country: '',
-  //   Awards: '',
-  //   Poster: '',
-  //   Ratings: [],
-  //   Metascore: '',
-  //   imdbRating: '',
-  //   imdbVotes: '',
-  //   imdbID: '',
-  //   Type: '',
-  //   DVD: '',
-  //   BoxOffice: '',
-  //   Production: '',
-  //   Website: '',
-  //   Response: ''
-  // };
+  const emptyMovie: OMDbData = {
+    Title: '',
+    Year: '',
+    Rated: '',
+    Released: '',
+    Runtime: '',
+    Genre: '',
+    Director: '',
+    Writer: '',
+    Actors: '',
+    Plot: '',
+    Language: '',
+    Country: '',
+    Awards: '',
+    Poster: '',
+    Ratings: [],
+    Metascore: '',
+    imdbRating: '',
+    imdbVotes: '',
+    imdbID: '',
+    Type: '',
+    DVD: '',
+    BoxOffice: '',
+    Production: '',
+    Website: '',
+    Response: ''
+  };
 
   const [data, setData] = useState({});
-  const [results, setResults] = useState<tmdbResults>({});
+  const [results, setResults] = useState([]);
   const [search, setSearch] = useState("");
-  const [imgUrl, setImgUrl] = useState("");
-  // const [genres, setGenres] = useState<string[]>([]);
+  const [posterUrl, setPosterUrl] = useState("");
+  const [director, setDirector] = useState([]);
+  const [creator, setCreator] = useState([]);
+  const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
 
-  // const apiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
+  const inputRef = useRef(null);
 
   const tmdbApiKey = process.env.NEXT_PUBLIC_TMDb_API_KEY;
+  const omdbApiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
 
-  const formatter = new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    compactDisplay: 'short',
-    maximumFractionDigits: 1
-  });
-
-  useEffect(() => {
-    console.log('results updated');
-    const firstResult = results.results[0];
-    fetchData(firstResult);
-  }, [results]);
+  // const formatter = new Intl.NumberFormat('en-US', {
+  //   notation: 'compact',
+  //   compactDisplay: 'short',
+  //   maximumFractionDigits: 1
+  // });
 
   useEffect(() => {
-    fetchImage(data);
+    inputRef.current.focus();
+  }, []);
+
+  useEffect(() => {
+    if (search.length > 2) {
+      fetchResults(search);
+    }
+    console.log(results);
+  }, [search]);
+
+  // useEffect(() => {
+  //   if (Object.keys(results).length > 0) {
+  //     const firstResult = results[0];
+  //     fetchData(firstResult);
+  //   }
+  // }, [results]);
+
+  useEffect(() => {
+    if (Object.keys(data).length > 0) {
+      fetchPoster(data);
+      if ("created_by" in data) {
+        fetchCreator(data);
+      } else {
+        fetchDirector(data);
+      }
+    }
   }, [data]);
 
+  // const handleSearch = async (query) => {
+  //   const year = [];
+
+
+  //   setSearch(query);
+  // };
+
   const fetchResults = async (search: string) => {
-    const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${search}`);
-    setResults(response.data);
+    const response = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
+    const items = response.data.results;
+    let filteredResults = items.filter(item => item.media_type !== "person" && item.poster_path !== null);
+    filteredResults = filteredResults.splice(0, 10);
+    setResults(filteredResults);
   };
 
   const fetchData = async (result) => {
     const id = result.id;
-    const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}&append_to_response=credits`);
-    setData(response.data);
+    const mediaType = result.media_type;
+    const response = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`);
+    const data = response.data;
+    setData(data);
+    fetchOmdbData(data.external_ids.imdb_id);
   };
 
-  const fetchImage = async (data) => {
-    const response = axios.get(`https://image.tmdb.org/t/p/w500/${data.poster_path}`); // in production, set width to "original"
-    setImgUrl(response.data);
+  const fetchPoster = async (data) => {
+    setPosterUrl(`https://image.tmdb.org/t/p/w500/${data.poster_path}`);
   };
 
-  // const isImgValid = (url: string) => {
-  //   return new Promise((resolve) => {
-  //     const img: HTMLImageElement = new Image();
-  //     img.onload = () => resolve(true);
-  //     img.onerror = () => resolve(false);
-  //     img.src = url;
-  //   });
-  // }
+  const fetchDirector = async (data) => {
+    data.credits.crew.forEach(member => {
+      if (member.job === "Director") {
+        setDirector([...director, member.original_name]);
+      }
+    });
+  };
+
+  const fetchCreator = async (data) => {
+    data.created_by.forEach(person => setCreator([...creator, person.original_name]));
+  };
+
+  const fetchOmdbData = async (imdbId: string) => {
+    const response = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}`);
+    setOmdbData(response.data);
+  };
 
   return (
     <>
@@ -148,60 +190,117 @@ export default function Home() {
         <nav>
           <ul>
             <li>Movie/TV Show</li>
-            <li>Album</li>
+            <li>Music</li>
             <li>Game</li>
             <li>Book</li>
           </ul>
         </nav>
       </div>
       <div>
-        <input type="text" placeholder="Search movie" onChange={(e) => {
+        <input type="text" placeholder="Search movie" ref={inputRef} onChange={(e) => {
           setSearch(e.target.value);
-        }} onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            setSearch(search.replace(" ", "+"));
-            fetchResults(search);
-          }
-        }} />
+        }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setDirector([]);
+              setCreator([]);
+              if (results.length > 0) {
+                inputRef.current.value = "";
+                setResults([]);
+                inputRef.current.focus();
+                const firstResult = results[0];
+                fetchData(firstResult);
+              }
+            }
+          }}
+        />
+        <div>
+          {results.length > 0 && results.map((result) => {
+            return (
+              result.media_type === "movie" ? (
+                <div key={result.id} onClick={() => {
+                  setDirector([]);
+                  setCreator([]);
+                  setResults([]);
+                  inputRef.current.value = "";
+                  inputRef.current.focus();
+                  fetchData(result);
+                }}>
+                  <div>
+                    <img src={`https://image.tmdb.org/t/p/w200/${result.poster_path}`} />
+                  </div>
+                  <div>
+                    <div>
+                      {result.title}
+                    </div>
+                    <div>
+                      {result.release_date.split("-")[0] + " \u00B7 " + result.media_type}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div key={result.id} onClick={() => {
+                  setDirector([]);
+                  setCreator([]);
+                  setResults([]);
+                  inputRef.current.value = "";
+                  inputRef.current.focus();
+                  fetchData(result);
+                }}>
+                  <div>
+                    <img src={`https://image.tmdb.org/t/p/w200/${result.poster_path}`} />
+                  </div>
+                  <div>
+                    <div>
+                      {result.name}
+                    </div>
+                    <div>
+                      {result.first_air_date.split("-")[0] + " \u00B7 " + result.media_type}
+                    </div>
+                  </div>
+                </div>
+              ));
+          })}
+        </div>
       </div>
       {data.original_title &&
         <>
           <div>
             <div>
-              <Image
-                src={data.Poster}
-                alt="Poster"
-                width={300}
-                height={444}
-              />
+              {posterUrl && (
+                <Image
+                  src={posterUrl}
+                  alt="Poster"
+                  width={300}
+                  height={444}
+                  priority
+                />
+              )}
             </div>
             <div>
               <div>
-                <h1>{data.Title} ({data.Year})</h1>
+                <h1>{data.original_title} ({data.release_date.split("-")[0]})</h1>
               </div>
               <div>
-                <h3>By {data.Director !== "N/A" ? data.Director : data.Writer}</h3>
+                <h3>Directed by {director.join(", ")}</h3>
               </div>
               <div>
-                <h3>Unicritic Score:</h3>
+                <h3>Uniscore:</h3>
               </div>
               <div>
                 <h1>68%</h1>
               </div>
               <div>
-                <span>{data.Plot}</span>
+                <span>Based on 7 major review sites</span>
               </div>
               <div></div>
             </div>
           </div>
           <div>
-            <nav>
-              <ul>
-                <li>Graph</li>
-                <li>Ratings</li>
-              </ul>
-            </nav>
-            {data.imdbRating !== "N/A" &&
+            <div>
+              Ratings:
+            </div>
+            {omdbData.imdbRating !== "N/A" &&
               <div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
@@ -210,10 +309,10 @@ export default function Home() {
                   height={100}
                   priority
                 />
-                <span>IMDb: {data.imdbRating}/10 from {formatter.format(Number(data.imdbVotes))} ratings</span>
+                <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
               </div>
             }
-            {data.Metascore !== "N/A" &&
+            {omdbData.Metascore !== "N/A" &&
               <div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
@@ -222,10 +321,110 @@ export default function Home() {
                   height={100}
                   priority
                 />
-                <span>Metacritic: {data.Metascore}%</span>
+                <span>Metacritic: {omdbData.Metascore}/100</span>
+              </div>
+            }
+            {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                  alt="Rotten Tomatoes Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
               </div>
             }
           </div>
+          <nav>
+            <ul>
+              <li>Graph</li>
+              <li>Stats</li>
+            </ul>
+          </nav>
+        </>
+      }
+      {data.original_name &&
+        <>
+          <div>
+            <div>
+              {posterUrl && (
+                <Image
+                  src={posterUrl}
+                  alt="Poster"
+                  width={300}
+                  height={444}
+                  priority
+                />
+              )}
+            </div>
+            <div>
+              <div>
+                <h1>{data.original_name} ({data.first_air_date.split("-")[0] + "\u2013" + data.last_air_date.split("-")[0]})</h1>
+              </div>
+              <div>
+                <h3>Created by {creator.join(", ")}</h3>
+              </div>
+              <div>
+                <h3>Uniscore:</h3>
+              </div>
+              <div>
+                <h1>68%</h1>
+              </div>
+              <div>
+                <span>Based on 7 major review sites</span>
+              </div>
+              <div></div>
+            </div>
+          </div>
+          <div>
+            <div>
+              Ratings:
+            </div>
+            {omdbData.imdbRating !== "N/A" &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                  alt="IMDb Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
+              </div>
+            }
+            {omdbData.Metascore !== "N/A" &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                  alt="Metacritic Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Metacritic: {omdbData.Metascore}/100</span>
+              </div>
+            }
+            {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                  alt="Rotten Tomatoes Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
+              </div>
+            }
+          </div>
+          <nav>
+            <ul>
+              <li>Graph</li>
+              <li>Stats</li>
+            </ul>
+          </nav>
         </>
       }
     </>
