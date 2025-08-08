@@ -95,6 +95,7 @@ export default function Home() {
   const [director, setDirector] = useState([]);
   const [creator, setCreator] = useState([]);
   const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
+  const [lbData, setLbData] = useState({});
 
   const inputRef = useRef(null);
 
@@ -153,11 +154,14 @@ export default function Home() {
 
   const fetchData = async (result) => {
     const id = result.id;
+    const title = result.title;
     const mediaType = result.media_type;
     const response = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`);
     const data = response.data;
+    const imdbId = data.external_ids.imdb_id;
     setData(data);
-    fetchOmdbData(data.external_ids.imdb_id);
+    fetchOmdbData(imdbId);
+    fetchLetterboxd(title, id);
   };
 
   const fetchPoster = async (data) => {
@@ -167,18 +171,28 @@ export default function Home() {
   const fetchDirector = async (data) => {
     data.credits.crew.forEach(member => {
       if (member.job === "Director") {
-        setDirector([...director, member.original_name]);
+        setDirector([...director, member.name]);
       }
     });
   };
 
   const fetchCreator = async (data) => {
-    data.created_by.forEach(person => setCreator([...creator, person.original_name]));
+    data.created_by.forEach(person => setCreator([...creator, person.name]));
   };
 
   const fetchOmdbData = async (imdbId: string) => {
     const response = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}`);
     setOmdbData(response.data);
+  };
+
+  const fetchLetterboxd = async (title: string, tmdbId: string) => {
+    const response = await axios.get(`/api/letterboxd`, {
+      params: {
+        title,
+        tmdbId
+      }
+    });
+    setLbData(response.data);
   };
 
   return (
@@ -263,7 +277,7 @@ export default function Home() {
           })}
         </div>
       </div>
-      {data.original_title &&
+      {data.title &&
         <>
           <div>
             <div>
@@ -279,7 +293,7 @@ export default function Home() {
             </div>
             <div>
               <div>
-                <h1>{data.original_title} ({data.release_date.split("-")[0]})</h1>
+                <h1>{data.title} ({data.release_date.split("-")[0]})</h1>
               </div>
               <div>
                 <h3>Directed by {director.join(", ")}</h3>
@@ -336,6 +350,18 @@ export default function Home() {
                 <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
               </div>
             }
+            {lbData.rating !== undefined && 
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                  alt="Letterboxd Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Letterboxd: {lbData.rating.toFixed(1)}</span>
+              </div>
+            }
           </div>
           <nav>
             <ul>
@@ -345,7 +371,7 @@ export default function Home() {
           </nav>
         </>
       }
-      {data.original_name &&
+      {data.name &&
         <>
           <div>
             <div>
@@ -361,7 +387,7 @@ export default function Home() {
             </div>
             <div>
               <div>
-                <h1>{data.original_name} ({data.first_air_date.split("-")[0] + "\u2013" + data.last_air_date.split("-")[0]})</h1>
+                <h1>{data.name} ({data.first_air_date.split("-")[0] + "\u2013" + data.last_air_date.split("-")[0]})</h1>
               </div>
               <div>
                 <h3>Created by {creator.join(", ")}</h3>
