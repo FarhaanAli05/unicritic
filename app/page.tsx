@@ -94,19 +94,15 @@ export default function Home() {
   const [posterUrl, setPosterUrl] = useState("");
   const [director, setDirector] = useState([]);
   const [creator, setCreator] = useState([]);
+  const [mubiParams, setMubiParams] = useState({});
   const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
   const [lbData, setLbData] = useState({});
+  const [mubiData, setMubiData] = useState({});
 
   const inputRef = useRef(null);
 
   const tmdbApiKey = process.env.NEXT_PUBLIC_TMDb_API_KEY;
   const omdbApiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
-
-  // const formatter = new Intl.NumberFormat('en-US', {
-  //   notation: 'compact',
-  //   compactDisplay: 'short',
-  //   maximumFractionDigits: 1
-  // });
 
   useEffect(() => {
     inputRef.current.focus();
@@ -116,15 +112,11 @@ export default function Home() {
     if (search.length > 2) {
       fetchResults(search);
     }
-    console.log(results);
   }, [search]);
 
-  // useEffect(() => {
-  //   if (Object.keys(results).length > 0) {
-  //     const firstResult = results[0];
-  //     fetchData(firstResult);
-  //   }
-  // }, [results]);
+  useEffect(() => {
+    console.log(results);
+  }, [results]);
 
   useEffect(() => {
     if (Object.keys(data).length > 0) {
@@ -137,47 +129,52 @@ export default function Home() {
     }
   }, [data]);
 
-  // const handleSearch = async (query) => {
-  //   const year = [];
-
-
-  //   setSearch(query);
-  // };
+  useEffect(() => {
+    if (mubiParams.title && mubiParams.year && mubiParams.director) {
+      fetchMubiData(mubiParams.title, mubiParams.year, mubiParams.director);
+    }
+  }, [mubiParams]);
 
   const fetchResults = async (search: string) => {
     const response = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
     const items = response.data.results;
     let filteredResults = items.filter(item => item.media_type !== "person" && item.poster_path !== null);
-    filteredResults = filteredResults.splice(0, 10);
+    filteredResults = filteredResults.slice(0, 10);
     setResults(filteredResults);
   };
 
   const fetchData = async (result) => {
     const id = result.id;
-    const title = result.title;
+    const title = result.title || result.name;
+    const year = result.release_date
+      ? result.release_date.split("-")[0]
+      : result.first_air_date.split("-")[0];
     const mediaType = result.media_type;
     const response = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`);
     const data = response.data;
     const imdbId = data.external_ids.imdb_id;
     setData(data);
+    setMubiParams(prev => ({ ...prev, title, year }));
     fetchOmdbData(imdbId);
-    fetchLetterboxd(title, id);
+    fetchLbData(title, id);
   };
 
-  const fetchPoster = async (data) => {
+  const fetchPoster = (data) => {
     setPosterUrl(`https://image.tmdb.org/t/p/w500/${data.poster_path}`);
   };
 
-  const fetchDirector = async (data) => {
-    data.credits.crew.forEach(member => {
-      if (member.job === "Director") {
-        setDirector([...director, member.name]);
-      }
-    });
+  const fetchDirector = (data) => {
+    const directors = data.credits.crew
+      .filter(member => member.job === "Director")
+      .map(director => director.name);
+    setDirector(directors);
+
+    setMubiParams(prev => ({ ...prev, director: director[0] }));
   };
 
-  const fetchCreator = async (data) => {
-    data.created_by.forEach(person => setCreator([...creator, person.name]));
+  const fetchCreator = (data) => {
+    const creators = data.created_by.map(person => person.name);
+    setCreator(creators);
   };
 
   const fetchOmdbData = async (imdbId: string) => {
@@ -185,7 +182,7 @@ export default function Home() {
     setOmdbData(response.data);
   };
 
-  const fetchLetterboxd = async (title: string, tmdbId: string) => {
+  const fetchLbData = async (title: string, tmdbId: string) => {
     const response = await axios.get(`/api/letterboxd`, {
       params: {
         title,
@@ -195,6 +192,37 @@ export default function Home() {
     setLbData(response.data);
   };
 
+  const fetchMubiData = async (title: string, year: string, director: string = '') => {
+    const response = await axios.get(`/api/mubi`, {
+      params: {
+        title,
+        year,
+        director
+      }
+    });
+    setMubiData(response.data);
+  };
+
+  const clearData = () => {
+    setDirector([]);
+    setCreator([]);
+    setResults([]);
+    setLbData({});
+  };
+
+  const getYear = (date) => {
+    return date?.split("-")[0] ?? '';
+  };
+
+  const firstAirDate = getYear(data.first_air_date);
+  const lastAirDate = getYear(data.last_air_date);
+  const yearRange =
+    firstAirDate && lastAirDate
+    ? firstAirDate === lastAirDate
+      ? firstAirDate
+      : `${firstAirDate}\u2013${lastAirDate}`
+    : '';
+
   return (
     <>
       <div className="logo-container">
@@ -203,7 +231,7 @@ export default function Home() {
       <div>
         <nav>
           <ul>
-            <li>Movie/TV Show</li>
+            <li>Movie/TV</li>
             <li>Music</li>
             <li>Game</li>
             <li>Book</li>
@@ -211,18 +239,16 @@ export default function Home() {
         </nav>
       </div>
       <div>
-        <input type="text" placeholder="Search movie" ref={inputRef} onChange={(e) => {
+        <input type="text" placeholder="Search movie/TV" ref={inputRef} onChange={(e) => {
           setSearch(e.target.value);
         }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              setDirector([]);
-              setCreator([]);
               if (results.length > 0) {
                 inputRef.current.value = "";
-                setResults([]);
                 inputRef.current.focus();
                 const firstResult = results[0];
+                clearData();
                 fetchData(firstResult);
               }
             }
@@ -233,12 +259,10 @@ export default function Home() {
             return (
               result.media_type === "movie" ? (
                 <div key={result.id} onClick={() => {
-                  setDirector([]);
-                  setCreator([]);
-                  setResults([]);
                   inputRef.current.value = "";
                   inputRef.current.focus();
                   fetchData(result);
+                  clearData();
                 }}>
                   <div>
                     <img src={`https://image.tmdb.org/t/p/w200/${result.poster_path}`} />
@@ -254,12 +278,10 @@ export default function Home() {
                 </div>
               ) : (
                 <div key={result.id} onClick={() => {
-                  setDirector([]);
-                  setCreator([]);
-                  setResults([]);
                   inputRef.current.value = "";
                   inputRef.current.focus();
                   fetchData(result);
+                  clearData();
                 }}>
                   <div>
                     <img src={`https://image.tmdb.org/t/p/w200/${result.poster_path}`} />
@@ -350,7 +372,7 @@ export default function Home() {
                 <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
               </div>
             }
-            {lbData.rating !== undefined && 
+            {lbData.rating !== undefined &&
               <div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
@@ -360,6 +382,18 @@ export default function Home() {
                   priority
                 />
                 <span>Letterboxd: {lbData.rating.toFixed(1)}</span>
+              </div>
+            }
+            {mubiData.rating !== undefined &&
+              <div>
+                <Image
+                  src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                  alt="Mubi Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.ratings} ratings</span>
               </div>
             }
           </div>
@@ -387,7 +421,9 @@ export default function Home() {
             </div>
             <div>
               <div>
-                <h1>{data.name} ({data.first_air_date.split("-")[0] + "\u2013" + data.last_air_date.split("-")[0]})</h1>
+                <h1>
+                  {data.name} ({yearRange})
+                </h1>
               </div>
               <div>
                 <h3>Created by {creator.join(", ")}</h3>
@@ -442,6 +478,30 @@ export default function Home() {
                   priority
                 />
                 <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
+              </div>
+            }
+            {lbData.rating !== undefined &&
+              <div>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                  alt="Letterboxd Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Letterboxd: {lbData.rating.toFixed(1)}</span>
+              </div>
+            }
+            {mubiData.rating !== undefined &&
+              <div>
+                <Image
+                  src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                  alt="Mubi Logo"
+                  width={100}
+                  height={100}
+                  priority
+                />
+                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.ratings} ratings</span>
               </div>
             }
           </div>
