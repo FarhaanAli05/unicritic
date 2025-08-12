@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import useSWR from 'swr';
 import axios from 'axios';
 import Image from "next/image";
 
@@ -94,7 +95,6 @@ export default function Home() {
   const [posterUrl, setPosterUrl] = useState("");
   const [director, setDirector] = useState([]);
   const [creator, setCreator] = useState([]);
-  const [mubiParams, setMubiParams] = useState({});
   const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
   const [lbData, setLbData] = useState({});
   const [mubiData, setMubiData] = useState({});
@@ -115,10 +115,6 @@ export default function Home() {
   }, [search]);
 
   useEffect(() => {
-    console.log(results);
-  }, [results]);
-
-  useEffect(() => {
     if (Object.keys(data).length > 0) {
       fetchPoster(data);
       if ("created_by" in data) {
@@ -128,12 +124,6 @@ export default function Home() {
       }
     }
   }, [data]);
-
-  useEffect(() => {
-    if (mubiParams.title && mubiParams.year && mubiParams.director) {
-      fetchMubiData(mubiParams.title, mubiParams.year, mubiParams.director);
-    }
-  }, [mubiParams]);
 
   const fetchResults = async (search: string) => {
     const response = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
@@ -154,9 +144,9 @@ export default function Home() {
     const data = response.data;
     const imdbId = data.external_ids.imdb_id;
     setData(data);
-    setMubiParams(prev => ({ ...prev, title, year }));
     fetchOmdbData(imdbId);
     fetchLbData(title, id);
+    fetchMubiData(title, year);
   };
 
   const fetchPoster = (data) => {
@@ -168,8 +158,6 @@ export default function Home() {
       .filter(member => member.job === "Director")
       .map(director => director.name);
     setDirector(directors);
-
-    setMubiParams(prev => ({ ...prev, director: director[0] }));
   };
 
   const fetchCreator = (data) => {
@@ -183,24 +171,50 @@ export default function Home() {
   };
 
   const fetchLbData = async (title: string, tmdbId: string) => {
-    const response = await axios.get(`/api/letterboxd`, {
-      params: {
-        title,
-        tmdbId
-      }
-    });
-    setLbData(response.data);
+    try {
+      const response = await axios.get(`/api/letterboxd`, {
+        params: {
+          title,
+          tmdbId
+        }
+      });
+      const filmData = response.data;
+      setLbData({ link: filmData.film.link, rating: filmData.film.rating })
+    } catch (error) {
+      console.error('Error fetching Letterboxd data:', error);
+      setLbData({});
+    }
   };
 
-  const fetchMubiData = async (title: string, year: string, director: string = '') => {
-    const response = await axios.get(`/api/mubi`, {
-      params: {
-        title,
-        year,
-        director
+  const fetchMubiData = async (title: string, year: string) => {
+    // const fetcher = async ([url, title, year, director]) => {
+    //   const res = await fetch(`${url}?title=${title}&year=${year}&director=${director}`);
+    //   return res.json();
+    // };
+    // const { data, error, isLoading } = useSWR(`/api/mubi`, fetcher);
+    // if (error) setMubiData({});
+    // if (isLoading) setMubiData({ loading: true });
+    try {
+      const response = await axios.get(`/api/mubi`, {
+        params: {
+          title,
+          year
+        }
+      });
+
+      const filmData = response?.data?.props?.initialProps?.pageProps?.initFilm;
+
+      if (!filmData) {
+        console.warn('No film data found for:', { title, year });
+        setMubiData({});
+        return;
       }
-    });
-    setMubiData(response.data);
+
+      setMubiData({ rating: filmData.average_rating_out_of_ten, votes: filmData.number_of_ratings });
+    } catch (error) {
+      console.error('Error fetching Mubi data:', error);
+      setMubiData({});
+    }
   };
 
   const clearData = () => {
@@ -208,6 +222,7 @@ export default function Home() {
     setCreator([]);
     setResults([]);
     setLbData({});
+    setMubiData({});
   };
 
   const getYear = (date) => {
@@ -218,10 +233,10 @@ export default function Home() {
   const lastAirDate = getYear(data.last_air_date);
   const yearRange =
     firstAirDate && lastAirDate
-    ? firstAirDate === lastAirDate
-      ? firstAirDate
-      : `${firstAirDate}\u2013${lastAirDate}`
-    : '';
+      ? firstAirDate === lastAirDate
+        ? firstAirDate
+        : `${firstAirDate}\u2013${lastAirDate}`
+      : '';
 
   return (
     <>
@@ -393,7 +408,7 @@ export default function Home() {
                   height={100}
                   priority
                 />
-                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.ratings} ratings</span>
+                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.votes} ratings</span>
               </div>
             }
           </div>
@@ -501,7 +516,7 @@ export default function Home() {
                   height={100}
                   priority
                 />
-                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.ratings} ratings</span>
+                <span>Mubi: {mubiData.rating.toFixed(1)}/10 based on {mubiData.votes} ratings</span>
               </div>
             }
           </div>

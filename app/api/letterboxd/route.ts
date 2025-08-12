@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return links[tmdbIndex].id === tmdbId;
     });
     if (match) {
-        return NextResponse.json({ link: match.film.link, rating: match.film.rating });
+      return NextResponse.json(match);
     }
     return NextResponse.json({ error: "Movie not found" }, { status: 404 });
   } catch (err) {
