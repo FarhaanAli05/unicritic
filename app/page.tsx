@@ -98,6 +98,9 @@ export default function Home() {
   const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
   const [lbData, setLbData] = useState({});
   const [mubiData, setMubiData] = useState({});
+  const [metric, setMetric] = useState({});
+  const [count, setCount] = useState(0);
+  const [uniscore, setUniscore] = useState(-1);
 
   const inputRef = useRef(null);
 
@@ -111,6 +114,8 @@ export default function Home() {
   useEffect(() => {
     if (search.length > 2) {
       fetchResults(search);
+    } else if (search.length === 0) {
+      setResults({});
     }
   }, [search]);
 
@@ -124,6 +129,22 @@ export default function Home() {
       }
     }
   }, [data]);
+
+  useEffect(() => {
+    let counter = 0;
+    let total = 0;
+    console.log("metric", metric);
+    Object.keys(metric).forEach(key => {
+      if (metric[key] && metric[key] !== 'N/A') {
+        total += Number(metric[key]);
+        counter++;
+      }
+    });
+    setCount(counter);
+    console.log("Real score", (total / counter) / 20);
+    console.log("Rounded score", Math.round(total / counter) / 20);
+    setUniscore(Math.round((total / counter / 20) * 10) / 10);
+  }, [metric]);
 
   const fetchResults = async (search: string) => {
     const response = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
@@ -166,8 +187,20 @@ export default function Home() {
   };
 
   const fetchOmdbData = async (imdbId: string) => {
-    const response = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}`);
-    setOmdbData(response.data);
+    try {
+      const response = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}`);
+      const filmData = response.data;
+      setOmdbData(filmData);
+      setMetric(prev => ({
+        ...prev,
+        IMDb: filmData.imdbRating.replace(".", "") ?? '',
+        RottenTomatoes: filmData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") ? filmData?.Ratings[1].Value.replace("%", "") : '',
+        Metacritic: filmData.Metascore ?? ''
+      }));
+    } catch (error) {
+      console.error('Error fetchng OMDb data:', error);
+      setOmdbData({});
+    }
   };
 
   const fetchLbData = async (title: string, tmdbId: string) => {
@@ -179,7 +212,12 @@ export default function Home() {
         }
       });
       const filmData = response.data;
-      setLbData({ link: filmData.film.link, rating: filmData.film.rating })
+      setLbData({ link: filmData.film.link, rating: filmData.film.rating });
+      const ratingOutOf100 = filmData.film.rating * 20;
+      setMetric(prev => ({
+        ...prev,
+        Letterboxd: ratingOutOf100
+      }));
     } catch (error) {
       console.error('Error fetching Letterboxd data:', error);
       setLbData({});
@@ -211,6 +249,10 @@ export default function Home() {
       }
 
       setMubiData({ rating: filmData.average_rating_out_of_ten, votes: filmData.number_of_ratings });
+      setMetric(prev => ({
+        ...prev,
+        Mubi: filmData.average_rating_out_of_ten * 10
+      }));
     } catch (error) {
       console.error('Error fetching Mubi data:', error);
       setMubiData({});
@@ -246,15 +288,15 @@ export default function Home() {
       <div>
         <nav>
           <ul>
-            <li>Movie/TV</li>
+            <li>Movies/TV</li>
             <li>Music</li>
-            <li>Game</li>
-            <li>Book</li>
+            <li>Games</li>
+            <li>Books</li>
           </ul>
         </nav>
       </div>
       <div>
-        <input type="text" placeholder="Search movie/TV" ref={inputRef} onChange={(e) => {
+        <input type="text" placeholder="Search movies/TV" ref={inputRef} onChange={(e) => {
           setSearch(e.target.value);
         }}
           onKeyDown={(e) => {
@@ -339,10 +381,10 @@ export default function Home() {
                 <h3>Uniscore:</h3>
               </div>
               <div>
-                <h1>68%</h1>
+                <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
               </div>
               <div>
-                <span>Based on 7 major review sites</span>
+                <span>Based on {count} major review sites</span>
               </div>
               <div></div>
             </div>
@@ -402,7 +444,7 @@ export default function Home() {
             {mubiData.rating !== undefined &&
               <div>
                 <Image
-                  src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                  src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/videos/mubi-bu9bsufjk96nkmbnvhtat.png/mubi-c4bymuk2b2nbaykhwmx68u.png?_a=DATAg1AAZAA0"
                   alt="Mubi Logo"
                   width={100}
                   height={100}
@@ -447,10 +489,10 @@ export default function Home() {
                 <h3>Uniscore:</h3>
               </div>
               <div>
-                <h1>68%</h1>
+                <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
               </div>
               <div>
-                <span>Based on 7 major review sites</span>
+                <span>Based on {count} major review sites</span>
               </div>
               <div></div>
             </div>
@@ -510,7 +552,7 @@ export default function Home() {
             {mubiData.rating !== undefined &&
               <div>
                 <Image
-                  src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                  src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/videos/mubi-bu9bsufjk96nkmbnvhtat.png/mubi-c4bymuk2b2nbaykhwmx68u.png?_a=DATAg1AAZAA0"
                   alt="Mubi Logo"
                   width={100}
                   height={100}
