@@ -190,6 +190,11 @@ export default function Home() {
     try {
       const response = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}`);
       const filmData = response.data;
+      if (filmData.Response === "False") {
+        console.error('Error fetching OMDb data');
+        setOmdbData({});
+        return;
+      }
       setOmdbData(filmData);
       setMetric(prev => ({
         ...prev,
@@ -265,6 +270,7 @@ export default function Home() {
     setResults([]);
     setLbData({});
     setMubiData({});
+    setMetric({});
   };
 
   const getYear = (date) => {
@@ -384,7 +390,7 @@ export default function Home() {
                 <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
               </div>
               <div>
-                <span>Based on {count} major review sites</span>
+                <span>{count === 1 ? `Based on ${count} major review site` : count > 1 ? `Based on ${count} major review sites` : "" }</span>
               </div>
               <div></div>
             </div>
@@ -393,42 +399,46 @@ export default function Home() {
             <div>
               Ratings:
             </div>
-            {omdbData.imdbRating !== "N/A" &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                  alt="IMDb Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
-              </div>
-            }
-            {omdbData.Metascore !== "N/A" &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                  alt="Metacritic Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>Metacritic: {omdbData.Metascore}/100</span>
-              </div>
-            }
-            {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                  alt="Rotten Tomatoes Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
-              </div>
-            }
+            {Object.keys(omdbData).length > 0 && (
+              <>
+                {omdbData.imdbRating !== "N/A" &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                      alt="IMDb Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
+                  </div>
+                }
+                {omdbData.Metascore !== "N/A" &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                      alt="Metacritic Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>Metacritic: {omdbData.Metascore}/100</span>
+                  </div>
+                }
+                {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                      alt="Rotten Tomatoes Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
+                  </div>
+                }
+              </>
+            )}
             {lbData.rating !== undefined &&
               <div>
                 <Image
@@ -492,7 +502,7 @@ export default function Home() {
                 <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
               </div>
               <div>
-                <span>Based on {count} major review sites</span>
+                <span>{count === 1 ? `Based on ${count} major review site` : count > 1 ? `Based on ${count} major review sites` : "" }</span>
               </div>
               <div></div>
             </div>
@@ -501,42 +511,46 @@ export default function Home() {
             <div>
               Ratings:
             </div>
-            {omdbData.imdbRating !== "N/A" &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                  alt="IMDb Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
-              </div>
-            }
-            {omdbData.Metascore !== "N/A" &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                  alt="Metacritic Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>Metacritic: {omdbData.Metascore}/100</span>
-              </div>
-            }
-            {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
-              <div>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                  alt="Rotten Tomatoes Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-                <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
-              </div>
-            }
+            {Object.keys(omdbData).length > 0 && (
+              <>
+                {omdbData.imdbRating !== "N/A" &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                      alt="IMDb Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>IMDb: {omdbData.imdbRating}/10 from {omdbData.imdbVotes} votes</span>
+                  </div>
+                }
+                {omdbData.Metascore !== "N/A" &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                      alt="Metacritic Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>Metacritic: {omdbData.Metascore}/100</span>
+                  </div>
+                }
+                {omdbData.Ratings.some(rating => rating.Source === "Rotten Tomatoes") &&
+                  <div>
+                    <Image
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                      alt="Rotten Tomatoes Logo"
+                      width={100}
+                      height={100}
+                      priority
+                    />
+                    <span>Rotten Tomatoes: {omdbData.Ratings[1].Value}</span>
+                  </div>
+                }
+              </>
+            )}
             {lbData.rating !== undefined &&
               <div>
                 <Image
