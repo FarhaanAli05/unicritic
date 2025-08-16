@@ -3,12 +3,11 @@ import axios from 'axios';
 
 const apiUrl = 'https://api.letterboxd.com/api/v0/search';
 
-export async function GET(request: NextRequest) {
-  const title = request.nextUrl.searchParams.get('title');
-  const tmdbId = request.nextUrl.searchParams.get('tmdbId');
+export async function GET(req: NextRequest) {
+  const title = req.nextUrl.searchParams.get('title');
+  const tmdbId = req.nextUrl.searchParams.get('tmdbId');
   try {
-    const response = await axios.get(`${apiUrl}?input=${title}`);
-    const data = response.data;
+    const { data } = await axios.get(`${apiUrl}?input=${title}`);
     const items = data.items;
     const match = items.find(item => {
       const links = item.film?.links;
@@ -20,7 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(match);
     }
     return NextResponse.json({ error: "Movie not found" }, { status: 404 });
-  } catch (err) {
+  } catch (error) {
     return NextResponse.json({ error: 'Could not fetch Letterboxd data' }, { status: 500 });
   }
 }
