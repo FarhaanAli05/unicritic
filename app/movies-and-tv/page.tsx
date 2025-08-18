@@ -97,6 +97,7 @@ export default function MoviesAndTv() {
   const [creator, setCreator] = useState([]);
   const [omdbData, setOmdbData] = useState<OMDbData>(emptyMovie);
   const [lbData, setLbData] = useState({});
+  const [mubiParams, setMubiParams] = useState({});
   const [mubiData, setMubiData] = useState({});
   const [serialzdData, setSerializdData] = useState({});
   const [metric, setMetric] = useState({});
@@ -132,6 +133,19 @@ export default function MoviesAndTv() {
   }, [data]);
 
   useEffect(() => {
+    setMubiParams(prev => ({
+      ...prev,
+      director: director[0]
+    }));
+  }, [director]);
+
+  useEffect(() => {
+    if (mubiParams.title !== "" && mubiParams.year !== "" && mubiParams.director?.length > 0) {
+      fetchMubiData(mubiParams.title, mubiParams.director, mubiParams.year);
+    }
+  }, [mubiParams]);
+
+  useEffect(() => {
     let counter = 0;
     let total = 0;
     console.log("metric", metric);
@@ -158,14 +172,23 @@ export default function MoviesAndTv() {
     const title = result.title || result.name;
     const year = result.release_date
       ? result.release_date.split("-")[0]
-      : result.first_air_date.split("-")[0];
+      : result.first_air_date
+        ? result.first_air_date.split("-")[0]
+        : '';
     const mediaType = result.media_type;
     const { data } = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`);
     const imdbId = data.external_ids.imdb_id;
     setData(data);
+    if (mediaType === 'tv') {
+      fetchMubiData(title, '', year);
+    }
+    setMubiParams(prev => ({
+      ...prev,
+      title,
+      year
+    }));
     fetchOmdbData(imdbId);
     fetchLbData(title, id);
-    fetchMubiData(title, year);
     fetchSerializdData(title, id);
   };
 
@@ -226,7 +249,7 @@ export default function MoviesAndTv() {
     }
   };
 
-  const fetchMubiData = async (title: string, year: string) => {
+  const fetchMubiData = async (title: string, director: string, year: string) => {
     // const fetcher = async ([url, title, year, director]) => {
     //   const res = await fetch(`${url}?title=${title}&year=${year}&director=${director}`);
     //   return res.json();
@@ -238,6 +261,7 @@ export default function MoviesAndTv() {
       const { data } = await axios.get(`/api/mubi`, {
         params: {
           title,
+          director,
           year
         }
       });
@@ -245,7 +269,7 @@ export default function MoviesAndTv() {
       const filmData = data?.nextData?.props?.initialProps?.pageProps?.initFilm;
 
       if (!filmData) {
-        console.warn('No film data found for:', { title, year });
+        console.warn('No MUBI data found for:', { title, year });
         setMubiData({});
         return;
       }
@@ -276,7 +300,7 @@ export default function MoviesAndTv() {
       const filmData = data?.ratingData?.aggregateRating;
 
       if (!filmData) {
-        console.warn('No TV data found for:', { title });
+        console.warn('No Serializd data found for:', { title });
         setSerializdData({});
         return;
       }
@@ -311,23 +335,26 @@ export default function MoviesAndTv() {
 
   const firstAirDate = getYear(data.first_air_date);
   const lastAirDate = getYear(data.last_air_date);
+  const status = data.status;
   const yearRange =
-    firstAirDate && lastAirDate
-      ? firstAirDate === lastAirDate
-        ? firstAirDate
-        : `${firstAirDate}\u2013${lastAirDate}`
+    firstAirDate && lastAirDate && status
+      ? status === "Returning Series"
+        ? `${firstAirDate}\u2013`
+        : firstAirDate === lastAirDate
+          ? firstAirDate
+          : `${firstAirDate}\u2013${lastAirDate}`
       : '';
 
   return (
     <>
       <div className="logo-container">
-        <Link href={"/"}>Unicritic</Link>
+        <Link href={"/movies-and-tv"}>Unicritic</Link>
       </div>
       <div>
         <nav>
           <ul>
-            <li>Movies/TV</li>
-            <li>Music</li>
+            <li><Link href={"/movies-and-tv"}>Movies/TV</Link></li>
+            <li><Link href={"/music"}>Music</Link></li>
             <li>Games</li>
             <li>Books</li>
           </ul>
@@ -410,10 +437,10 @@ export default function MoviesAndTv() {
             </div>
             <div>
               <div>
-                <h1>{data.title} ({data.release_date.split("-")[0]})</h1>
+                <h1>{data.title}{!data.release_date ? '' : ` (${data.release_date?.split("-")[0]})`}</h1>
               </div>
               <div>
-                <h3>Directed by {director.join(", ")}</h3>
+                <h3>{director.length > 0 ? `Directed by ${director.join(", ")}` : ''}</h3>
               </div>
               <div>
                 <h3>Uniscore:</h3>
@@ -521,11 +548,11 @@ export default function MoviesAndTv() {
             <div>
               <div>
                 <h1>
-                  {data.name} ({yearRange})
+                  {data.name}{yearRange !== '' ? ` (${yearRange})` : ''}
                 </h1>
               </div>
               <div>
-                <h3>Created by {creator.join(", ")}</h3>
+                <h3>{creator.length > 0 ? `Created by ${creator.join(", ")}` : ''}</h3>
               </div>
               <div>
                 <h3>Uniscore:</h3>
