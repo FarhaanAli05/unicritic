@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import axios from 'axios';
@@ -92,23 +91,9 @@ export default function MoviesAndTv() {
   };
 
   const [results, setResults] = useState([]);
-  const [search, setSearch] = useState("");
-  const inputRef = useRef(null);
   const router = useRouter();
 
   const tmdbApiKey = process.env.NEXT_PUBLIC_TMDb_API_KEY;
-
-  useEffect(() => {
-    inputRef.current.focus();
-  }, []);
-
-  useEffect(() => {
-    if (search.length > 2) {
-      fetchResults(search);
-    } else if (search.length === 0) {
-      setResults({});
-    }
-  }, [search]);
 
   const fetchResults = async (search: string) => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
@@ -136,16 +121,17 @@ export default function MoviesAndTv() {
           <ul>
             <li><Link href={"/movies-and-tv"}>Movies/TV</Link></li>
             <li><Link href={"/music"}>Music</Link></li>
-            <li>Games</li>
-            <li>Books</li>
+            <li><Link href={"/game"}>Games</Link></li>
+            <li><Link href={"/book"}>Books</Link></li>
           </ul>
         </nav>
       </div>
       <SearchBar
-        inputRef={inputRef}
-        setSearch={setSearch}
+        type={"movies-and-tv"}
         goToDetails={goToDetails}
         results={results}
+        setResults={setResults}
+        fetchResults={fetchResults}
       />
     </>
   );

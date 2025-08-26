@@ -8,12 +8,10 @@ import SearchBar from '@/components/SearchBar';
 import axios from 'axios';
 
 export default function MovieOrTvPage() {
-
   const hasRun = useRef(false); // remove in prod
 
   const [data, setData] = useState({});
   const [results, setResults] = useState([]);
-  const [search, setSearch] = useState("");
   const [posterUrl, setPosterUrl] = useState("");
   const [director, setDirector] = useState([]);
   const [creator, setCreator] = useState([]);
@@ -26,7 +24,6 @@ export default function MovieOrTvPage() {
   const [count, setCount] = useState(0);
   const [uniscore, setUniscore] = useState(-1);
 
-  const inputRef = useRef(null);
   const router = useRouter();
   const params = useParams();
 
@@ -44,17 +41,7 @@ export default function MovieOrTvPage() {
     tmdbId = slug.pop();
     mediaType = params["mediaType"];
     fetchData(mediaType, tmdbId);
-
-    inputRef.current.focus();
   }, []);
-
-  useEffect(() => {
-    if (search.length > 2) {
-      fetchResults(search);
-    } else if (search.length === 0) {
-      setResults({});
-    }
-  }, [search]);
 
   useEffect(() => {
     if (Object.keys(data).length > 0) {
@@ -107,7 +94,6 @@ export default function MovieOrTvPage() {
     const tmdbId = result.id
     const slug = `${slugTitle}-${tmdbId}`
     setResults({});
-    console.log(`/movies-and-tv/${mediaType}/${slug}`);
     router.push(`/movies-and-tv/${mediaType}/${slug}`);
   };
 
@@ -362,10 +348,11 @@ export default function MovieOrTvPage() {
           </div>
         </div> */}
         <SearchBar
-          inputRef={inputRef}
-          setSearch={setSearch}
+          type={"movies-and-tv"}
           goToDetails={goToDetails}
           results={results}
+          setResults={setResults}
+          fetchResults={fetchResults}
         />
         {data.title &&
           <>
