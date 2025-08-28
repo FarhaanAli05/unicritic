@@ -22,7 +22,7 @@ export default function MovieOrTvPage() {
   // const [mubiData, setMubiData] = useState({});
   // const [serialzdData, setSerializdData] = useState({});
   const [metric, setMetric] = useState({});
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(-1);
   const [uniscore, setUniscore] = useState(-1);
 
   const [tmdbId, setTmdbId] = useState<string | null>(null);
@@ -72,20 +72,6 @@ export default function MovieOrTvPage() {
   //     fetchMubiData(mubiParams.title, mubiParams.director, mubiParams.year);
   //   }
   // }, [mubiParams]);
-
-  useEffect(() => {
-    let counter = 0;
-    let total = 0;
-    console.log("metric", metric);
-    Object.keys(metric).forEach(key => {
-      if (metric[key] && metric[key] !== 'N/A') {
-        total += Number(metric[key]);
-        counter++;
-      }
-    });
-    setCount(counter);
-    setUniscore(Math.round((total / counter / 20) * 10) / 10);
-  }, [metric]);
 
   const fetchResults = async (search: string) => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
@@ -171,7 +157,6 @@ export default function MovieOrTvPage() {
     fetcher,
     { shouldRetryOnError: false }
   );
-  console.log(omdbData);
   const hasOmdbData = omdbData && omdbData.Response === "True";
   const shouldRenderOmdb = omdbIsLoading || hasOmdbData;
 
@@ -239,7 +224,7 @@ export default function MovieOrTvPage() {
     { shouldRetryOnError: false }
   );
   const filmDataMubi = mubiData?.nextData?.props?.initialProps?.pageProps?.initFilm;
-  const hasRatingMubi = filmDataMubi != null;
+  const hasRatingMubi = filmDataMubi?.average_rating_out_of_ten != null;
   const shouldRenderMubi = mubiIsLoading || hasRatingMubi;
 
   useEffect(() => {
@@ -291,7 +276,7 @@ export default function MovieOrTvPage() {
     { shouldRetryOnError: false }
   );
   const filmDataSerializd = serializdData?.ratingData?.aggregateRating;
-  const hasRatingSerializd = filmDataSerializd != null;
+  const hasRatingSerializd = filmDataSerializd?.ratingValue != null;
   const shouldRenderSerializd = serializdIsLoading || hasRatingSerializd;
 
   useEffect(() => {
@@ -303,6 +288,43 @@ export default function MovieOrTvPage() {
       }));
     }
   }, [serializdData, hasRatingSerializd]);
+
+  // Calculate Uniscore
+  useEffect(() => {
+    const done = (lbData || lbError) &&
+      (year ? (mubiData || mubiError) : true) &&
+      (imdbId ? (omdbData || omdbError) : true) &&
+      (mediaType === "tv" ? (serializdData || serializdError) : true);
+    
+    // console.log("lb", (lbData || lbError));
+    // console.log("mubi", (year ? (mubiData || mubiError) : true));
+    // console.log("omdb", (imdbId ? (omdbData || omdbError) : true));
+    // console.log("serializd", (mediaType === "tv" ? (serializdData || serializdError) : true));
+    // console.log("count", count);
+
+    if (!done) {
+      return;
+    }
+
+    let counter = 0;
+    let total = 0;
+    console.log("metric", metric);
+
+    Object.keys(metric).forEach(key => {
+      if (metric[key] && metric[key] !== 'N/A') {
+        total += Number(metric[key]);
+        counter++;
+      }
+    });
+
+    if (counter > 0) {
+      setCount(counter);
+      setUniscore(Math.round((total / counter / 20) * 10) / 10);
+    } else {
+      setCount(0);
+      setUniscore(-1);
+    }
+  }, [metric, omdbData, omdbError, lbData, lbError, mubiData, mubiError, serializdData, serializdError, mediaType, imdbId]);
 
   // const fetchSerializdData = async (title: String, tmdbId) => {
   //   try {
@@ -399,7 +421,13 @@ export default function MovieOrTvPage() {
                   <h3>Uniscore:</h3>
                 </div>
                 <div>
-                  <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
+                  <h1>
+                    {count > -1
+                      ? count === 0
+                        ? "N/A"
+                        : `${uniscore}/5`
+                      : "Loading..."}
+                  </h1>
                 </div>
                 <div>
                   <span>{count === 1 ? `Based on ${count} major review site` : count > 1 ? `Based on ${count} major review sites` : ""}</span>
@@ -624,7 +652,13 @@ export default function MovieOrTvPage() {
                   <h3>Uniscore:</h3>
                 </div>
                 <div>
-                  <h1>{uniscore > -1 ? uniscore + '/5' : 'TBD'}</h1>
+                  <h1>
+                    {count > -1
+                      ? count === 0
+                        ? "N/A"
+                        : `${uniscore}/5`
+                      : "Loading..."}
+                  </h1>
                 </div>
                 <div>
                   <span>{count === 1 ? `Based on ${count} major review site` : count > 1 ? `Based on ${count} major review sites` : ""}</span>
