@@ -24,6 +24,8 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
   useEffect(() => {
     if (debouncedSearch.length > 2) {
       fetchResults(debouncedSearch);
+    } else if (debouncedSearch.length === 0) {
+      setResults({});
     }
   }, [debouncedSearch]);
 
@@ -47,8 +49,6 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
               inputRef.current.value = "";
               inputRef.current.focus();
               goToDetails(result);
-              // fetchData(result);
-              // clearData();
             }}>
               <div>
                 <img src={`https://image.tmdb.org/t/p/w200/${result.poster_path}`} />
@@ -64,7 +64,7 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
             </div>
           );
         })}
-        {type === "music" && results.length > 0 && results.map((result) => {
+        {/* {type === "music" && results.length > 0 && results.map((result) => {
           return (
             <div key={result.mbid} onClick={() => {
               inputRef.current.value = "";
@@ -86,7 +86,7 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
               </div>
             </div>
           );
-        })}
+        })} */}
       </div>
     </div>
   );
