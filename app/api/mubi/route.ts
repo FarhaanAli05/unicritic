@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 
 const apiUrl = 'https://api.mubi.com/v3/search';
 
-const searchTitleOnly = async (title: string, year: Number) => {
+const searchTitleOnly = async (title: string, year: number) => {
   try {
     const { data } = await axios.get(`${apiUrl}?query=${title}&include_series=true`, {
       headers: {
@@ -12,13 +12,13 @@ const searchTitleOnly = async (title: string, year: Number) => {
         CLIENT_COUNTRY: 'us'
       }
     });
-    return await fetchMovie(data, title, year);
+    return await matchMovie(data, title, year);
   } catch (error) {
     return null;
   }
 };
 
-const searchMubi = async (title: string, director: string, year: Number) => {
+const searchMubi = async (title: string, director: string, year: number) => {
   try {
     const { data } = await axios.get(`${apiUrl}?query=${title} ${director}&include_series=true`, {
       headers: {
@@ -26,13 +26,13 @@ const searchMubi = async (title: string, director: string, year: Number) => {
         CLIENT_COUNTRY: 'us'
       }
     });
-    return await fetchMovie(data, title, year);
+    return await matchMovie(data, title, year);
   } catch (error) {
     return null;
   }
 };
 
-const fetchMovie = async (data, title, year) => {
+const matchMovie = async (data, title, year) => {
   // console.log(data);
   const items = data.search.films;
   let match = items.find(item => {
