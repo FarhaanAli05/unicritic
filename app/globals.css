@@ -25,3 +25,9 @@ p, li {
   line-height: 1.25rem;
   color: rgb(186, 191, 195);
 }
+
+span {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: rgb(186, 191, 195);
+}

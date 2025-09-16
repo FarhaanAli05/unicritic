@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const bestOnly = searchParams.get('bestOnly') !== 'false';
 
   try {
-    const results = await search(title, country, language, count, bestOnly);
+    const results = await search(title, country, language, count, bestOnly);;
     const match = results.find(result => result.tmdb_id == tmdbId);
     if (!match) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });

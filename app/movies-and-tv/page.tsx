@@ -17,7 +17,7 @@ export default function MoviesAndTv() {
   const fetchResults = async (search: string) => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
     let filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
-    setResults(filtered.slice(0, 10));
+    setResults(filtered);
   };
 
   const goToDetails = (result: TMDbResults) => {
