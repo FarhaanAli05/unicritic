@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import Image from "next/image";
 import SearchBar from '@/components/SearchBar';
 import axios from 'axios';
 import { TMDbResults } from '@/types/tmdb';
@@ -32,7 +33,16 @@ export default function MoviesAndTv() {
   return (
     <>
       <div className="logo-container">
-        <Link href={"/movies-and-tv"}>Unicritic</Link>
+        <Image
+          src="/icons/unicritic-logo.svg"
+          alt="Unicritic Logo"
+          width={39}
+          height={44}
+          priority
+        />
+        <Link href={"/movies-and-tv"}>
+          <h1>Unicritic</h1>
+        </Link>
       </div>
       <div>
         <nav>
