@@ -2,17 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/app/hooks/useDebounce";
 
-export default function SearchBar({ type, goToDetails, results, setResults, fetchResults }) {
+export default function SearchBar({ page, goToDetails, results, setResults, fetchResults }) {
   const [search, setSearch] = useState("");
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  let debouncedSearch;
-  if (type === "movies-and-tv") {
-    debouncedSearch = useDebounce(search, 300);
-  } else if (type === "music") {
-    debouncedSearch = useDebounce(search, 1000);
-  }
+  const delay = page === "movies-and-tv" ? 300 : page === "music" ? 1000 : 300;
+  const debouncedSearch = useDebounce(search, delay);
 
   useEffect(() => {
     inputRef.current.focus();
@@ -46,9 +42,9 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
         <input
           className="w-full h-10 bg-transparent outline-none"
           type="text"
-          placeholder={`Search for ${type === "movies-and-tv"
+          placeholder={`Search for ${page === "movies-and-tv"
             ? "a movie or TV show..."
-            : type === "music" && "an album..."
+            : page === "music" && "an album..."
             }`}
           ref={inputRef}
           onChange={(e) => {
@@ -68,7 +64,7 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
 
       {isFocused && results.length > 0 && (
         <div className="absolute top-full left-0 w-full max-h-96 bg-[#18191D] border border-[#606060] rounded-[10px] overflow-auto z-50">
-          {type === "movies-and-tv" && results.length > 0 && results.map((result) => {
+          {page === "movies-and-tv" && results.length > 0 && results.map((result) => {
             return (
               <div
                 key={result.id}
@@ -97,7 +93,7 @@ export default function SearchBar({ type, goToDetails, results, setResults, fetc
               </div>
             );
           })}
-          {/* {type === "music" && results.length > 0 && results.map((result) => {
+          {/* {page === "music" && results.length > 0 && results.map((result) => {
           return (
             <div key={result.mbid} onClick={() => {
               inputRef.current.value = "";

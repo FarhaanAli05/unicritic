@@ -12,6 +12,7 @@ import { TMDbData, TMDbResults } from '@/types/tmdb';
 import { COUNTRIES } from '@/components/country-picker/countries';
 import CountrySelector from '@/components/country-picker/selector';
 import { useCountry } from '@/components/CountryProvider';
+import Navbar from '@/components/Navbar';
 
 interface Metric {
   [key: string]: any
@@ -361,38 +362,13 @@ export default function MovieOrTvPage() {
 
   return (
     <div className='max-w-250 mx-auto py-10'>
-      <div className="flex items-center gap-x-10 justify-center">
-        <div className='flex-1 w-fit'>
-          <Link href={"/movies-and-tv"} className="flex items-center gap-x-3">
-            <Image
-              src="/icons/unicritic-logo.svg"
-              alt="Unicritic Logo"
-              width={39}
-              height={44}
-              priority
-            />
-            <h1>Unicritic</h1>
-          </Link>
-        </div>
-        <div className='flex-2'>
-          <SearchBar
-            type={"movies-and-tv"}
-            goToDetails={goToDetails}
-            results={results}
-            setResults={setResults}
-            fetchResults={fetchResults}
-          />
-        </div>
-        <nav className='flex-[1.5]'>
-          <ul className='flex justify-between items-center'>
-            <li><Link href={"/movies-and-tv"}>Movies & TV</Link></li>
-            <li><Link href={"/music"}>Music</Link></li>
-            <li><Link href={"/game"}>Games</Link></li>
-            <li><Link href={"/book"}>Books</Link></li>
-          </ul>
-        </nav>
-      </div>
-
+      <Navbar
+        page={"movies-and-tv"}
+        goToDetails={goToDetails}
+        results={results}
+        setResults={setResults}
+        fetchResults={fetchResults}
+      />
       {data?.title && (
         <div className='flex gap-x-10 mt-10'>
           <div className='flex-[1]'>
@@ -588,30 +564,32 @@ export default function MovieOrTvPage() {
                     target='_blank'
                     rel="noopener noreferrer"
                   >
-                  <div>
-                    <Image
-                      src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
-                      className='rounded-[10px]'
-                      alt="Mubi Logo"
-                      width={70}
-                      height={70}
-                      priority
-                    />
-                    <h1>
-                      {mubiIsLoading
-                        ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        : hasRatingMubi
-                          ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
-                          : null}
-                    </h1>
-                  </div>
+                    <div>
+                      <Image
+                        src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                        className='rounded-[10px]'
+                        alt="Mubi Logo"
+                        width={70}
+                        height={70}
+                        priority
+                      />
+                      <h1>
+                        {mubiIsLoading
+                          ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                          : hasRatingMubi
+                            ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
+                            : null}
+                      </h1>
+                    </div>
                   </a>
                 )}
               </div>
             </div>
             {jwIsLoading ? (
               <Image
-                src="/icons/loading-spinner.gif" width={50}
+                src="/icons/loading-spinner.gif" 
+                className='mt-7'
+                width={50}
                 height={50}
                 alt="Loading Spinner"
                 unoptimized
