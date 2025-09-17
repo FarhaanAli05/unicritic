@@ -172,10 +172,6 @@ export default function MovieOrTvPage() {
     }
   }, [jwData, hasJwData]);
 
-  useEffect(() => {
-    console.log("justwatch data", services);
-  }, [services]);
-
   // Fetch OMDb data
   interface OMDbData {
     Ratings: {
@@ -319,7 +315,6 @@ export default function MovieOrTvPage() {
 
     let counter = 0;
     let total = 0;
-    console.log("metric", metric);
 
     Object.keys(metric).forEach(key => {
       if (metric[key] && metric[key] !== 'N/A') {
@@ -419,7 +414,7 @@ export default function MovieOrTvPage() {
               })}
             </div>
             {trailerUrl && (
-              <a href={trailerUrl} target="_blank" className='flex gap-x-3 justify-center'>
+              <a href={trailerUrl} target="_blank" className='flex gap-x-3 bg-[#AA1B63] w-fit mx-auto px-4 py-2 rounded-full'>
                 <Image
                   src="/icons/play-button-icon.svg"
                   width={24}
@@ -481,7 +476,7 @@ export default function MovieOrTvPage() {
               {data.tagline ? data.tagline : ""}
             </p>
             <div>
-              <div className='[&>div]:rounded-[10px] [&>div]:border-[0.5px] [&>div]:border-[#606060] [&>div]:border-solid [&>div]:bg-[#18191D] [&>div]:w-fit [&>div]:py-4 [&>div]:px-5 [&>div]:justify-center [&>div]:flex [&>div]:flex-col [&>div]:items-center flex gap-x-4 mt-6'>
+              <div className='[&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-[#606060] [&_div]:border-solid [&_div]:bg-[#18191D] [&_div]:w-fit [&_div]:py-4 [&_div]:px-5 [&_div]:justify-center [&_div]:flex [&_div]:flex-col [&_div]:items-center flex gap-x-4 mt-6'>
                 {!omdbError && shouldRenderOmdb && (
                   <>
                     {/* IMDb */}
@@ -496,17 +491,23 @@ export default function MovieOrTvPage() {
                         />
                         <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
                       </div>
-                    ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                          alt="IMDb Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{omdbData.imdbRating}</h1>
-                      </div>
+                    ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && imdbId && (
+                      <a
+                        href={`https://www.imdb.com/title/${imdbId}/`}
+                        target='_blank'
+                        rel="noopener noreferrer"
+                      >
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                            alt="IMDb Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <h1>{omdbData.imdbRating}</h1>
+                        </div>
+                      </a>
                     )}
 
                     {/* Metacritic */}
@@ -514,7 +515,7 @@ export default function MovieOrTvPage() {
                       <div>
                         <Image
                           src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="IMDb Logo"
+                          alt="Metacritic Logo"
                           width={70}
                           height={70}
                           priority
@@ -525,7 +526,7 @@ export default function MovieOrTvPage() {
                       <div>
                         <Image
                           src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="IMDb Logo"
+                          alt="Metacritic Logo"
                           width={70}
                           height={70}
                           priority
@@ -561,21 +562,32 @@ export default function MovieOrTvPage() {
                   </>
                 )}
                 {!lbError && shouldRenderLb && (
-                  <div>
-                    <Image
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
-                      alt="Letterboxd Logo"
-                      width={70}
-                      height={70}
-                      priority
-                    />
-                    <h1>
-                      {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
-                        hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
-                    </h1>
-                  </div>
+                  <a
+                    href={lbData?.film?.link ?? "#"}
+                    target='_blank'
+                    rel="noopener noreferrer"
+                  >
+                    <div>
+                      <Image
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                        alt="Letterboxd Logo"
+                        width={70}
+                        height={70}
+                        priority
+                      />
+                      <h1>
+                        {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
+                          hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
+                      </h1>
+                    </div>
+                  </a>
                 )}
                 {!mubiError && shouldRenderMubi && (
+                  <a
+                    href={mubiData?.url ?? '#'}
+                    target='_blank'
+                    rel="noopener noreferrer"
+                  >
                   <div>
                     <Image
                       src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
@@ -593,9 +605,8 @@ export default function MovieOrTvPage() {
                           : null}
                     </h1>
                   </div>
+                  </a>
                 )}
-                {/* <Image />
-              <h1></h1> */}
               </div>
             </div>
             {jwIsLoading ? (
