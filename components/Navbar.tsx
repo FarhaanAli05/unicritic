@@ -72,7 +72,7 @@ export default function Navbar({
                 <li>
                   <Link
                     className={page === "games" ? "font-bold" : ""}
-                    href={"/game"}
+                    href={"/games"}
                   >
                     Games
                   </Link>
@@ -80,7 +80,7 @@ export default function Navbar({
                 <li>
                   <Link
                     className={page === "books" ? "font-bold" : ""}
-                    href={"/book"}
+                    href={"/books"}
                   >
                     Books
                   </Link>
