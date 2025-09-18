@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from "next/navigation";
 import axios from 'axios';
 import { TMDbResults } from '@/types/tmdb';
-import Navbar from '@/components/Navbar';
 import Container from '@/components/Container';
 import SearchBar from '@/components/SearchBar';
 import Link from 'next/link';
@@ -18,7 +17,7 @@ export default function MoviesAndTv() {
 
   const fetchResults = async (search: string) => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
-    let filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
+    const filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
     setResults(filtered);
   };
 
@@ -34,7 +33,7 @@ export default function MoviesAndTv() {
 
   return (
     <div>
-      <Container className='flex items-center justify-center h-screen flex-col gap-y-5'>
+      <Container className='flex items-center justify-center h-[90vh] flex-col gap-y-5'>
         <nav className="absolute top-10">
           <ul className="flex justify-end items-center gap-x-5">
             <li><Link className="font-bold" href={"/movies-and-tv"}>Movies & TV</Link></li>

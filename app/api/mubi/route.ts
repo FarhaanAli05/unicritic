@@ -1,10 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-const cheerio = require('cheerio');
+import axios, { AxiosError } from 'axios';
+import * as cheerio from 'cheerio';
 
 const apiUrl = 'https://api.mubi.com/v3/search';
 
-const searchTitleOnly = async (title: string, year: number) => {
+export interface MubiInitFilm {
+  average_rating_out_of_ten?: number;
+  average_rating?: number;
+  number_of_ratings?: number;
+}
+
+export interface NextDataShape {
+  props?: {
+    initialProps?: {
+      pageProps?: {
+        initFilm?: MubiInitFilm;
+        series?: MubiInitFilm;
+      }
+    }
+  };
+}
+
+interface MubiFilm {
+  title: string;
+  year: number;
+  canonical_url: string;
+}
+
+interface MubiSearchResponse {
+  search: {
+    films: MubiFilm[];
+  };
+}
+
+const searchMubiByTitleOnly = async (title: string, year: number) => {
   try {
     const { data } = await axios.get(`${apiUrl}?query=${title}&include_series=true`, {
       headers: {
@@ -12,13 +41,13 @@ const searchTitleOnly = async (title: string, year: number) => {
         CLIENT_COUNTRY: 'us'
       }
     });
-    return await matchMovie(data, title, year);
+    return await findBestMatch(data, title, year);
   } catch (error) {
     return null;
   }
 };
 
-const searchMubi = async (title: string, director: string, year: number) => {
+const searchMubiByTitleAndDirector = async (title: string, director: string, year: number) => {
   try {
     const { data } = await axios.get(`${apiUrl}?query=${title} ${director}&include_series=true`, {
       headers: {
@@ -26,17 +55,24 @@ const searchMubi = async (title: string, director: string, year: number) => {
         CLIENT_COUNTRY: 'us'
       }
     });
-    return await matchMovie(data, title, year);
+    return await findBestMatch(data, title, year);
   } catch (error) {
     return null;
   }
 };
 
-const matchMovie = async (data, title, year) => {
-  // console.log(data);
+const normalize = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+
+const findBestMatch = async (data: MubiSearchResponse, title: string, year: number) => {
+  console.log(data);
   const items = data.search.films;
   let match = items.find(item => {
-    // console.log(item.title, title, item.title.includes(title))
+    console.log(item.title, title, item.title.includes(title))
     return (item.title.includes(title) || title?.includes(item.title)) && year === item.year;
   });
   if (match) {
@@ -44,16 +80,17 @@ const matchMovie = async (data, title, year) => {
   } else {
     const yearApprox = { [year - 1]: true, [year]: true, [year + 1]: true };
     match = items.find(item => {
-      // console.log(item.title, title, item.title.includes(title))
+      console.log(item.title, title, item.title.includes(title))
       return (item.title.includes(title) || title?.includes(item.title)) && yearApprox[item.year];
     });
     if (match) {
       return match
     } else {
-      const cleanedTitle = title.replace(/[^a-zA-Z0-9]/g, '');
+      const cleanedTitle = normalize(title);
       match = items.find(item => {
-        // console.log(item.title, title, item.title.includes(title))
-        const cleanedItem = item.title.replace(/[^a-zA-Z0-9]/g, '');
+        console.log('item:', item);
+        console.log(item.title, title, item.title.includes(title))
+        const cleanedItem = normalize(item.title);
         return (cleanedItem.includes(cleanedTitle) || cleanedTitle.includes(cleanedItem)) && yearApprox[item.year];
       });
       if (match) {
@@ -64,7 +101,7 @@ const matchMovie = async (data, title, year) => {
   }
 };
 
-const getNextData = async (match) => {
+const fetchMubiNextData = async (match: MubiFilm) => {
   const url = match.canonical_url;
   const getHtmlContent = async (url: string) => {
     try {
@@ -78,8 +115,9 @@ const getNextData = async (match) => {
       });
       return data;
     } catch (error) {
-      const status = error?.response?.status ?? 502;
-      const message = error?.message ?? "Failed to fetch HTML";
+      const err = error as AxiosError;
+      const status = err?.response?.status ?? 502;
+      const message = err?.message ?? "Failed to fetch HTML";
       throw { status, message, original: err };
     }
   };
@@ -99,33 +137,37 @@ const getNextData = async (match) => {
 export async function GET(req: NextRequest) {
   try {
   const title = req.nextUrl.searchParams.get('title');
-  const director = req.nextUrl.searchParams.get('director');
+  const director = req.nextUrl.searchParams.get('director') || "";
   const year = Number(req.nextUrl.searchParams.get('year'));
   let match;
+  
+  if (!title) {
+    return NextResponse.json({ error: 'Title query param is required' }, { status: 400 });
+  }
+
   if (`${title} ${director}`.length > 35) {
     if (title.length > 35) {
       const short = title.slice(0, 35);
-      match = await searchTitleOnly(short, year);
+      match = await searchMubiByTitleOnly(short, year);
     } else {
-      match = await searchTitleOnly(title, year);
+      match = await searchMubiByTitleOnly(title, year);
     }
   } else {
-    match = await searchMubi(title, director, year);
+    match = await searchMubiByTitleAndDirector(title, director, year);
   }
   if (!match) {
     return NextResponse.json({ error: "Movie not found" }, { status: 404 });
   }
-  try {
-    const mubiData = await getNextData(match);
+    const mubiData = await fetchMubiNextData(match);
     return NextResponse.json(mubiData);
-  } catch (error: any) {
-    console.error("Error when fetching Mubi page:", error);
-    const status = error?.status ?? 502;
-    const message = error?.message ?? "Failed to fetch MUBI page";
-    return NextResponse.json({ error: message }, { status });
-  }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      console.error("Error when fetching Mubi page:", error);
+      const status = error?.response?.status ?? 502;
+      const message = error?.message ?? "Failed to fetch MUBI page";
+      return NextResponse.json({ error: message }, { status });
+    }
     console.error("Unexpected error in /api/mubi:", error);
-    return NextResponse.json({ error: error?.message ?? "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   } 
 }

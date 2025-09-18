@@ -1,22 +1,31 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/app/hooks/useDebounce";
+import { TMDbResults } from "@/types/tmdb";
 
-export default function SearchBar({ page, goToDetails, results, setResults, fetchResults }) {
+interface SearchBarProps {
+  page: string
+  goToDetails: (result: TMDbResults) => void
+  results: TMDbResults[]
+  setResults: (results: TMDbResults[]) => void
+  fetchResults: (search: string) => void
+}
+
+export default function SearchBar({ page, goToDetails, results, setResults, fetchResults }: SearchBarProps) {
   const [search, setSearch] = useState("");
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
   const delay = page === "movies-and-tv" ? 300 : page === "music" ? 1000 : 300;
   const debouncedSearch = useDebounce(search, delay);
 
   useEffect(() => {
-    inputRef.current.focus();
+    if (inputRef.current !== null) inputRef.current.focus();
   }, []);
 
   useEffect(() => {
     if (search.length === 0) {
-      setResults({});
+      setResults([]);
     }
   }, [search]);
 
@@ -24,7 +33,7 @@ export default function SearchBar({ page, goToDetails, results, setResults, fetc
     if (debouncedSearch.length > 2) {
       fetchResults(debouncedSearch);
     } else if (debouncedSearch.length === 0) {
-      setResults({});
+      setResults([]);
     }
   }, [debouncedSearch]);
 
@@ -51,7 +60,7 @@ export default function SearchBar({ page, goToDetails, results, setResults, fetc
             setSearch(e.target.value);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && results.length > 0) {
+            if (e.key === "Enter" && results.length > 0 && inputRef.current !== null) {
               inputRef.current.value = "";
               inputRef.current.focus();
               goToDetails(results[0]);
@@ -64,14 +73,16 @@ export default function SearchBar({ page, goToDetails, results, setResults, fetc
 
       {isFocused && results.length > 0 && (
         <div className="absolute top-full left-0 w-full max-h-96 bg-[#18191D] border border-[#606060] rounded-[10px] overflow-auto z-50">
-          {page === "movies-and-tv" && results.length > 0 && results.map((result) => {
+          {page === "movies-and-tv" && results.length > 0 && results.map((result: TMDbResults) => {
             return (
               <div
                 key={result.id}
                 className="flex gap-3 p-2 cursor-pointer hover:bg-[#2a2a2a]"
                 onMouseDown={() => {
-                  inputRef.current.value = "";
-                  inputRef.current.focus();
+                  if (inputRef.current !== null) {
+                    inputRef.current.value = "";
+                    inputRef.current.focus();
+                  }
                   goToDetails(result);
                 }}
               >

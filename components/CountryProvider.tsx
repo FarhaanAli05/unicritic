@@ -19,5 +19,9 @@ export function CountryProvider({ initialCountry, children }: { initialCountry: 
 }
 
 export function useCountry() {
-  return useContext(CountryContext);
+  const context = useContext(CountryContext);
+  if (!context) {
+    throw new Error("useCountry must be used within a CountryProvider");
+  }
+  return context;
 }

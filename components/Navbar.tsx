@@ -4,8 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
 import { useState } from "react";
+import { TMDbResults } from "@/types/tmdb";
 
-export default function Navbar({ page = "", goToDetails, results, setResults, fetchResults }) {
+interface NavbarProps {
+  page: string
+  goToDetails: (result: TMDbResults) => void
+  results: TMDbResults[]
+  setResults: (results: TMDbResults[]) => void
+  fetchResults: (search: string) => void
+}
+
+export default function Navbar({ page = "", goToDetails, results, setResults, fetchResults }: NavbarProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   return (

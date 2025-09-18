@@ -15,12 +15,6 @@ h1 {
   line-height: 2.5rem;
 }
 
-/* @media (200px <= width <= 640px) {
-  h1 {
-    font-size: 25px
-  }
-} */
-
 h2 {
   font-size: 1.5625rem;
   line-height: 2rem;

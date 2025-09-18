@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { search } from '@/lib/simplejustwatchapi';
+import { AxiosError } from 'axios';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -11,13 +12,16 @@ export async function GET(req: NextRequest) {
   const bestOnly = searchParams.get('bestOnly') !== 'false';
 
   try {
-    const results = await search(title, country, language, count, bestOnly);;
+    const results = await search(title, country, language, count, bestOnly);
     const match = results.find(result => result.tmdb_id == tmdbId);
     if (!match) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
     return NextResponse.json(match);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
@@ -12,9 +12,10 @@ import CountrySelector from '@/components/country-picker/selector';
 import { useCountry } from '@/components/CountryProvider';
 import Navbar from '@/components/Navbar';
 import Container from '@/components/Container';
+import { SelectMenuOption } from '@/components/country-picker/types';
 
 interface Metric {
-  [key: string]: any
+  [key: string]: number | string | undefined | null;
   IMDb?: string
   RottenTomatoes?: string
   Metacritic?: string
@@ -23,8 +24,6 @@ interface Metric {
 }
 
 export default function MovieOrTvPage() {
-  const hasRun = useRef(false); // remove in prod
-
   const [data, setData] = useState<TMDbData | null>(null);
   const [results, setResults] = useState<TMDbResults[]>([]);
   const [posterUrl, setPosterUrl] = useState("");
@@ -33,7 +32,11 @@ export default function MovieOrTvPage() {
   const [metric, setMetric] = useState<Metric>({});
   const [count, setCount] = useState(-1);
   const [uniscore, setUniscore] = useState(-1);
-  const [services, setServices] = useState({});
+  const [services, setServices] = useState<ServicesState>({
+    stream: [],
+    rent: [],
+    buy: [],
+  });
   const [trailerUrl, setTrailerUrl] = useState("");
 
   const [tmdbId, setTmdbId] = useState<string | null>(null);
@@ -49,10 +52,6 @@ export default function MovieOrTvPage() {
   const omdbApiKey = process.env.NEXT_PUBLIC_OMDb_API_KEY;
 
   useEffect(() => {
-    // remove in prod
-    if (hasRun.current) return;
-    hasRun.current = true;
-
     if (!params) return;
 
     let slug = params["slug"];
@@ -93,7 +92,7 @@ export default function MovieOrTvPage() {
 
   const fetchResults = async (search: string) => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
-    let filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
+    const filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
     setResults(filtered);
   };
 
@@ -116,11 +115,15 @@ export default function MovieOrTvPage() {
     setPosterUrl(`https://image.tmdb.org/t/p/w500/${data.poster_path}`);
   };
 
+  interface tmdbVideo {
+    type?: string
+  }
+
   const fetchTrailer = async () => {
     const { data } = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${tmdbId}/videos?api_key=${tmdbApiKey}`);
 
     if (data?.results?.length > 0) {
-      const trailers = data.results.filter(video => video.type === "Trailer");
+      const trailers = data.results.filter((video: tmdbVideo) => video.type === "Trailer");
       const trailer = trailers.pop();
       if (trailer?.key) {
         setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
@@ -129,7 +132,8 @@ export default function MovieOrTvPage() {
   };
 
   const fetchDirector = (data: TMDbData) => {
-    const directors = data.credits.crew
+    const crew = data.credits?.crew || [];
+    const directors = crew
       .filter(member => member.job === "Director")
       .map(director => director.name);
     setDirector(directors);
@@ -148,18 +152,44 @@ export default function MovieOrTvPage() {
       : '';
   const imdbId = data?.external_ids?.imdb_id ?? '';
 
+  interface JwPackage {
+    name: string;
+    icon: string;
+  }
+
+  interface JwOffer {
+    monetization_type?: string;
+    presentation_type?: string;
+    package: JwPackage;
+    url?: string;
+    price_value?: number;
+    price_currency?: string;
+  }
+
+  interface JwData {
+    title?: string;
+    tmdb_id?: string | number;
+    offers?: JwOffer[];
+  }
+
+  type ServicesState = {
+    stream: JwOffer[];
+    rent: JwOffer[];
+    buy: JwOffer[];
+  };
+
   // Fetch JustWatch data (streaming availability)
-  const { data: jwData, error: jwError, isLoading: jwIsLoading } = useSWRImmutable(
+  const { data: jwData, error: jwError, isLoading: jwIsLoading } = useSWRImmutable<JwData>(
     title && tmdbId && country && `/api/justwatch?title=${title}&tmdbId=${tmdbId}&country=${country}`
     , fetcher, { shouldRetryOnError: false });
-  const hasJwData = jwData && jwData.offers.length > 0;
+  const hasJwData = jwData && Array.isArray(jwData.offers) && jwData.offers.length > 0;
 
   useEffect(() => {
     if (hasJwData) {
-      const offers = jwData.offers;
-      const stream = [];
-      const rent = [];
-      const buy = [];
+      const offers: JwOffer[] = jwData.offers || [];
+      const stream: JwOffer[] = [];
+      const rent: JwOffer[] = [];
+      const buy: JwOffer[] = [];
       offers.forEach((offer) => {
         if (offer.monetization_type === "FLATRATE" || offer.monetization_type === "ADS") stream.push(offer);
         if (offer.monetization_type === "RENT") rent.push(offer);
@@ -175,8 +205,8 @@ export default function MovieOrTvPage() {
   // Fetch OMDb data
   interface OMDbData {
     Ratings: {
-      Source?: string,
-      Value?: String
+      Source?: string
+      Value?: string
     }[]
     Metascore: string
     imdbRating: string
@@ -244,6 +274,10 @@ export default function MovieOrTvPage() {
               average_rating_out_of_ten?: number
               number_of_ratings?: number
             }
+            series?: {
+              average_rating_out_of_ten?: number
+              number_of_ratings?: number
+            }
           }
         }
       }
@@ -263,7 +297,6 @@ export default function MovieOrTvPage() {
   const filmDataMubi = mubiData?.nextData?.props?.initialProps?.pageProps?.initFilm || mubiData?.nextData?.props?.initialProps?.pageProps?.series;
   const hasRatingMubi = filmDataMubi?.average_rating_out_of_ten != null;
   const shouldRenderMubi = mubiIsLoading || hasRatingMubi;
-  // console.log("mubiData", mubiData);
 
   useEffect(() => {
     if (!filmDataMubi?.average_rating_out_of_ten) return;
@@ -333,7 +366,9 @@ export default function MovieOrTvPage() {
     }
   }, [metric, omdbData, omdbError, lbData, lbError, mubiData, mubiError, serializdData, serializdError, mediaType, imdbId]);
 
-  const formatPrice = (priceValue, currencyCode) => {
+  const formatPrice = (priceValue?: number | null, currencyCode?: string | null): string => {
+    if (priceValue == null || !currencyCode) return "";
+
     return new Intl.NumberFormat("en", {
       style: "currency",
       currency: currencyCode,
@@ -384,7 +419,7 @@ export default function MovieOrTvPage() {
                 />
               )}
               <div className='flex flex-wrap gap-x-3 mt-5 mb-3 justify-center lg:justify-start'>
-                {data.genres.length > 0 && data.genres.map((genre, id) => {
+                {(data.genres ?? []).map((genre, id) => {
                   return (
                     <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
                   )
@@ -438,7 +473,7 @@ export default function MovieOrTvPage() {
                 </div>
               </div>
               <p className='!mt-4'>
-                {`${!data.release_date ? "" : ` ${data.release_date?.split("-")[0]}`} ${data.genres.length > 0 ? `• ${data.genres[0].name}` : ""} ${data?.runtime > 0 ? `• ${data?.runtime} min` : ""}`}
+                {`${!data.release_date ? "" : ` ${data.release_date?.split("-")[0]}`} ${data.genres?.length ? `• ${data.genres[0].name}` : ""} ${data?.runtime ? `• ${data.runtime} min` : ""}`}
               </p>
               <p>
                 {director.length > 0 ? (
@@ -669,7 +704,8 @@ export default function MovieOrTvPage() {
                                   alt={`${service.package.name} Logo`}
                                 />
                                 <span className="text-sm mt-2">
-                                  {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
+                                  {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"}${formatPrice(service.price_value, service.price_currency) ? ` • ${formatPrice(service.price_value, service.price_currency)}` : ""}`}
+
                                 </span>
                               </a>
                             ))}
@@ -728,7 +764,7 @@ export default function MovieOrTvPage() {
                 />
               )}
               <div className='flex flex-wrap gap-x-3 mt-5 mb-3 justify-center lg:justify-start'>
-                {data.genres.length > 0 && data.genres.map((genre, id) => {
+                {(data.genres ?? []).map((genre, id) => {
                   return (
                     <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
                   )
@@ -785,8 +821,8 @@ export default function MovieOrTvPage() {
               <p className='!mt-4'>
                 {`
                 ${yearRange !== '' ? ` ${yearRange}` : ''}
-                ${data.genres.length > 0 ? ` • ${data.genres[0].name}` : ''}
-                ${data?.number_of_seasons > 0
+                ${data?.genres?.length ? ` • ${data.genres[0].name}` : ''}
+                ${data?.number_of_seasons
                     ? ` • ${data.number_of_seasons} season${data.number_of_seasons > 1 ? 's' : ''}`
                     : ''
                   }
