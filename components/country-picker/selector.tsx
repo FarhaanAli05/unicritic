@@ -26,10 +26,10 @@ export default function CountrySelector({
   useEffect(() => {
     const mutableRef = ref as MutableRefObject<HTMLDivElement | null>;
 
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         mutableRef.current &&
-        !mutableRef.current.contains(event.target) &&
+        !mutableRef.current.contains(event.target as Node) &&
         open
       ) {
         onToggle();
@@ -74,34 +74,35 @@ export default function CountrySelector({
     };
   }, [ref, open, onToggle]);
 
-
   return (
     <div ref={ref}>
-      <div className="mt-1 relative">
+      <div className="relative mt-1">
         <button
           type="button"
-          className={`${disabled ? "bg-neutral-100" : "bg-[#18191D]"
-            } flex items-center gap-3 rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit min-w-[92px] py-2 px-3 pr-8 cursor-pointer`}
+          className={`${
+            disabled ? "bg-neutral-100" : "bg-[#18191D]"
+          } flex w-fit min-w-[92px] cursor-pointer items-center gap-3 rounded-[10px] border-[0.5px] border-solid border-[#606060] px-3 py-2 pr-8`}
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby="listbox-label"
           onClick={onToggle}
           disabled={disabled}
         >
-          <span className="truncate flex items-center">
+          <span className="flex items-center truncate">
             <Image
               src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.value}.svg`}
               width={24}
               height={16}
-              className={"inline mr-2 h-4 rounded-sm"}
+              className={"mr-2 inline h-4 rounded-sm"}
               alt={`${selectedValue.value}`}
             />
-            <div className="sm:block hidden">{selectedValue.title}</div>
-            <div className="sm:hidden block">{selectedValue.value}</div>
+            <div className="hidden sm:block">{selectedValue.title}</div>
+            <div className="block sm:hidden">{selectedValue.value}</div>
           </span>
           <span
-            className={`absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none ${disabled ? "hidden" : ""
-              }`}
+            className={`pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 ${
+              disabled ? "hidden" : ""
+            }`}
           >
             <svg
               className="h-5 w-5 text-gray-400"
@@ -126,19 +127,19 @@ export default function CountrySelector({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.05 }}
-              className="absolute z-10 mt-1 bg-[#18191D] border border-[#606060] rounded-[10px] overflow-auto w-60 sm:w-70 right-0 sm:left-0"
+              className="absolute right-0 z-10 mt-1 w-60 overflow-auto rounded-[10px] border border-[#606060] bg-[#18191D] sm:left-0 sm:w-70"
               tabIndex={-1}
               role="listbox"
               aria-labelledby="listbox-label"
               aria-activedescendant="listbox-option-3"
             >
               <div className="sticky top-0 z-10 bg-white">
-                <li className="bg-[#18191D] cursor-default select-none relative py-2 px-3">
+                <li className="relative cursor-default bg-[#18191D] px-3 py-2 select-none">
                   <input
                     type="search"
                     name="search"
                     autoComplete={"off"}
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                     placeholder={"Search a country"}
                     onChange={(e) => setQuery(e.target.value)}
                   />
@@ -148,23 +149,23 @@ export default function CountrySelector({
 
               <div
                 className={
-                  "max-h-64 scrollbar scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-thin overflow-y-scroll"
+                  "scrollbar scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-thin max-h-64 overflow-y-scroll"
                 }
               >
                 {COUNTRIES.filter((country) =>
-                  country.title.toLowerCase().startsWith(query.toLowerCase())
+                  country.title.toLowerCase().startsWith(query.toLowerCase()),
                 ).length === 0 ? (
-                  <li className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9">
+                  <li className="relative cursor-default py-2 pr-9 pl-3 text-gray-900 select-none">
                     No countries found
                   </li>
                 ) : (
                   COUNTRIES.filter((country) =>
-                    country.title.toLowerCase().startsWith(query.toLowerCase())
+                    country.title.toLowerCase().startsWith(query.toLowerCase()),
                   ).map((value, index) => {
                     return (
                       <li
                         key={`${id}-${index}`}
-                        className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-8 flex items-center hover:bg-[#2a2a2a] cursor-pointer transition"
+                        className="relative flex cursor-default cursor-pointer items-center py-2 pr-8 pl-3 text-gray-900 transition select-none hover:bg-[#2a2a2a]"
                         id="listbox-option-0"
                         role="option"
                         onClick={() => {
@@ -177,15 +178,15 @@ export default function CountrySelector({
                           src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${value.value}.svg`}
                           width={24}
                           height={16}
-                          className={"inline mr-2 h-4 rounded-sm"}
+                          className={"mr-2 inline h-4 rounded-sm"}
                           alt={`${value.value}`}
                         />
 
-                        <span className="font-normal truncate">
+                        <span className="truncate font-normal">
                           {value.title}
                         </span>
                         {value.value === selectedValue.value ? (
-                          <span className="text-blue-600 absolute inset-y-0 right-0 flex items-center pr-8">
+                          <span className="absolute inset-y-0 right-0 flex items-center pr-8 text-blue-600">
                             <svg
                               className="h-5 w-5"
                               xmlns="http://www.w3.org/2000/svg"

@@ -24,12 +24,8 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body
-        className={`${outfit.variable} antialiased`}
-      >
-        <CountryProvider initialCountry={country}>
-          {children}
-        </CountryProvider>
+      <body className={`${outfit.variable} antialiased`}>
+        <CountryProvider initialCountry={country}>{children}</CountryProvider>
       </body>
     </html>
   );

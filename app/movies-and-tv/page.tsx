@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from 'axios';
-import { TMDbResults } from '@/types/tmdb';
-import Container from '@/components/Container';
-import SearchBar from '@/components/SearchBar';
-import Link from 'next/link';
-import Image from 'next/image';
+import axios from "axios";
+import { TMDbResults } from "@/types/tmdb";
+import Container from "@/components/Container";
+import SearchBar from "@/components/SearchBar";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function MoviesAndTv() {
   const [results, setResults] = useState<TMDbResults[]>([]);
@@ -16,8 +16,13 @@ export default function MoviesAndTv() {
   const tmdbApiKey = process.env.NEXT_PUBLIC_TMDb_API_KEY;
 
   const fetchResults = async (search: string) => {
-    const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
-    const filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`,
+    );
+    const filtered = data.results.filter(
+      (item: TMDbResults) =>
+        item.media_type !== "person" && item.poster_path !== null,
+    );
     setResults(filtered);
   };
 
@@ -25,21 +30,31 @@ export default function MoviesAndTv() {
     const title = result.title || result.name;
     const slugTitle = title?.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const mediaType = result.media_type;
-    const tmdbId = result.id
-    const slug = `${slugTitle}-${tmdbId}`
+    const tmdbId = result.id;
+    const slug = `${slugTitle}-${tmdbId}`;
     setResults([]);
     router.push(`/movies-and-tv/${mediaType}/${slug}`);
   };
 
   return (
     <div>
-      <Container className='flex items-center justify-center h-[90vh] flex-col gap-y-5'>
+      <Container className="flex h-[90vh] flex-col items-center justify-center gap-y-5">
         <nav className="absolute top-10">
-          <ul className="flex justify-end items-center gap-x-5">
-            <li><Link className="font-bold" href={"/movies-and-tv"}>Movies & TV</Link></li>
-            <li><Link href={"/music"}>Music</Link></li>
-            <li><Link href={"/games"}>Games</Link></li>
-            <li><Link href={"/books"}>Books</Link></li>
+          <ul className="flex items-center justify-end gap-x-5">
+            <li>
+              <Link className="font-bold" href={"/movies-and-tv"}>
+                Movies & TV
+              </Link>
+            </li>
+            <li>
+              <Link href={"/music"}>Music</Link>
+            </li>
+            <li>
+              <Link href={"/games"}>Games</Link>
+            </li>
+            <li>
+              <Link href={"/books"}>Books</Link>
+            </li>
           </ul>
         </nav>
         <Link href={"/movies-and-tv"} className="flex items-center gap-x-3">
@@ -52,7 +67,7 @@ export default function MoviesAndTv() {
           />
           <h1>Unicritic</h1>
         </Link>
-        <div className='max-w-85 w-full my-1'>
+        <div className="my-1 w-full max-w-85">
           <SearchBar
             page={"movies-and-tv"}
             goToDetails={goToDetails}
@@ -61,7 +76,9 @@ export default function MoviesAndTv() {
             fetchResults={fetchResults}
           />
         </div>
-        <p className='mt-5 lg:mt-0 text-center'>Your universal critic. Instantly compare ratings.</p>
+        <p className="mt-5 text-center lg:mt-0">
+          Your universal critic. Instantly compare ratings.
+        </p>
       </Container>
     </div>
   );

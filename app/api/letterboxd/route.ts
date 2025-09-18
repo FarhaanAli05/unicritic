@@ -1,25 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
-const apiUrl = 'https://api.letterboxd.com/api/v0/search';
+const apiUrl = "https://api.letterboxd.com/api/v0/search";
 
 interface LetterboxdItems {
-  items: LetterboxdItem[]
+  items: LetterboxdItem[];
 }
 
 interface LetterboxdItem {
   film?: {
     links?: {
-      type: string
-      id: string
-      url: string
-    }[]
-  }
+      type: string;
+      id: string;
+      url: string;
+    }[];
+  };
 }
 
 export async function GET(req: NextRequest) {
-  const title = req.nextUrl.searchParams.get('title');
-  const tmdbId = req.nextUrl.searchParams.get('tmdbId');
+  const title = req.nextUrl.searchParams.get("title");
+  const tmdbId = req.nextUrl.searchParams.get("tmdbId");
   try {
     const { data } = await axios.get(`${apiUrl}?input=${title}`);
     const { items }: LetterboxdItems = data;
@@ -34,6 +34,9 @@ export async function GET(req: NextRequest) {
     }
     return NextResponse.json({ error: "Movie not found" }, { status: 404 });
   } catch (error) {
-    return NextResponse.json({ error: 'Could not fetch Letterboxd data' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not fetch Letterboxd data" },
+      { status: 500 },
+    );
   }
 }

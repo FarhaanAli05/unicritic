@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter, useParams } from 'next/navigation';
-import axios from 'axios';
-import useSWRImmutable from 'swr/immutable';
-import fetcher from '@/utils/fetcher';
-import { TMDbData, TMDbResults } from '@/types/tmdb';
-import { COUNTRIES } from '@/components/country-picker/countries';
-import CountrySelector from '@/components/country-picker/selector';
-import { useCountry } from '@/components/CountryProvider';
-import Navbar from '@/components/Navbar';
-import Container from '@/components/Container';
-import { SelectMenuOption } from '@/components/country-picker/types';
+import { useRouter, useParams } from "next/navigation";
+import axios from "axios";
+import useSWRImmutable from "swr/immutable";
+import fetcher from "@/utils/fetcher";
+import { TMDbData, TMDbResults } from "@/types/tmdb";
+import { COUNTRIES } from "@/components/country-picker/countries";
+import CountrySelector from "@/components/country-picker/selector";
+import { useCountry } from "@/components/CountryProvider";
+import Navbar from "@/components/Navbar";
+import Container from "@/components/Container";
+import { SelectMenuOption } from "@/components/country-picker/types";
 
 interface Metric {
   [key: string]: number | string | undefined | null;
-  IMDb?: string
-  RottenTomatoes?: string
-  Metacritic?: string
-  Letterboxd?: number
-  Mubi?: number
+  IMDb?: string;
+  RottenTomatoes?: string;
+  Metacritic?: string;
+  Letterboxd?: number;
+  Mubi?: number;
 }
 
 export default function MovieOrTvPage() {
@@ -58,7 +58,7 @@ export default function MovieOrTvPage() {
 
     if (!slug) return;
 
-    if (typeof slug === 'string') {
+    if (typeof slug === "string") {
       slug = slug.split("-");
     }
 
@@ -67,10 +67,10 @@ export default function MovieOrTvPage() {
 
     let type;
     if (params.mediaType === "movie" || params.mediaType === "tv") {
-      type = params.mediaType
+      type = params.mediaType;
       setMediaType(params.mediaType);
     } else {
-      setMediaType(null)
+      setMediaType(null);
     }
 
     setTmdbId(id);
@@ -91,8 +91,13 @@ export default function MovieOrTvPage() {
   }, [data]);
 
   const fetchResults = async (search: string) => {
-    const { data } = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`);
-    const filtered = data.results.filter((item: TMDbResults) => item.media_type !== "person" && item.poster_path !== null);
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${search}`,
+    );
+    const filtered = data.results.filter(
+      (item: TMDbResults) =>
+        item.media_type !== "person" && item.poster_path !== null,
+    );
     setResults(filtered);
   };
 
@@ -100,14 +105,16 @@ export default function MovieOrTvPage() {
     const title = result.title || result.name;
     const slugTitle = title?.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const mediaType = result.media_type;
-    const tmdbId = result.id
-    const slug = `${slugTitle}-${tmdbId}`
+    const tmdbId = result.id;
+    const slug = `${slugTitle}-${tmdbId}`;
     setResults([]);
     router.push(`/movies-and-tv/${mediaType}/${slug}`);
   };
 
   const fetchData = async (mediaType: string | undefined, tmdbId: string) => {
-    const { data } = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`);
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${tmdbApiKey}&append_to_response=credits,external_ids`,
+    );
     setData(data);
   };
 
@@ -116,14 +123,18 @@ export default function MovieOrTvPage() {
   };
 
   interface tmdbVideo {
-    type?: string
+    type?: string;
   }
 
   const fetchTrailer = async () => {
-    const { data } = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${tmdbId}/videos?api_key=${tmdbApiKey}`);
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/${mediaType}/${tmdbId}/videos?api_key=${tmdbApiKey}`,
+    );
 
     if (data?.results?.length > 0) {
-      const trailers = data.results.filter((video: tmdbVideo) => video.type === "Trailer");
+      const trailers = data.results.filter(
+        (video: tmdbVideo) => video.type === "Trailer",
+      );
       const trailer = trailers.pop();
       if (trailer?.key) {
         setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
@@ -134,13 +145,13 @@ export default function MovieOrTvPage() {
   const fetchDirector = (data: TMDbData) => {
     const crew = data.credits?.crew || [];
     const directors = crew
-      .filter(member => member.job === "Director")
-      .map(director => director.name);
+      .filter((member) => member.job === "Director")
+      .map((director) => director.name);
     setDirector(directors);
   };
 
   const fetchCreator = (data: TMDbData) => {
-    const creators = data?.created_by?.map(person => person.name) ?? [];
+    const creators = data?.created_by?.map((person) => person.name) ?? [];
     setCreator(creators);
   };
 
@@ -149,8 +160,8 @@ export default function MovieOrTvPage() {
     ? data?.release_date.split("-")[0]
     : data?.first_air_date
       ? data?.first_air_date.split("-")[0]
-      : '';
-  const imdbId = data?.external_ids?.imdb_id ?? '';
+      : "";
+  const imdbId = data?.external_ids?.imdb_id ?? "";
 
   interface JwPackage {
     name: string;
@@ -179,10 +190,20 @@ export default function MovieOrTvPage() {
   };
 
   // Fetch JustWatch data (streaming availability)
-  const { data: jwData, error: jwError, isLoading: jwIsLoading } = useSWRImmutable<JwData>(
-    title && tmdbId && country && `/api/justwatch?title=${title}&tmdbId=${tmdbId}&country=${country}`
-    , fetcher, { shouldRetryOnError: false });
-  const hasJwData = jwData && Array.isArray(jwData.offers) && jwData.offers.length > 0;
+  const {
+    data: jwData,
+    error: jwError,
+    isLoading: jwIsLoading,
+  } = useSWRImmutable<JwData>(
+    title &&
+      tmdbId &&
+      country &&
+      `/api/justwatch?title=${title}&tmdbId=${tmdbId}&country=${country}`,
+    fetcher,
+    { shouldRetryOnError: false },
+  );
+  const hasJwData =
+    jwData && Array.isArray(jwData.offers) && jwData.offers.length > 0;
 
   useEffect(() => {
     if (hasJwData) {
@@ -191,7 +212,11 @@ export default function MovieOrTvPage() {
       const rent: JwOffer[] = [];
       const buy: JwOffer[] = [];
       offers.forEach((offer) => {
-        if (offer.monetization_type === "FLATRATE" || offer.monetization_type === "ADS") stream.push(offer);
+        if (
+          offer.monetization_type === "FLATRATE" ||
+          offer.monetization_type === "ADS"
+        )
+          stream.push(offer);
         if (offer.monetization_type === "RENT") rent.push(offer);
         if (offer.monetization_type === "BUY") buy.push(offer);
       });
@@ -205,51 +230,61 @@ export default function MovieOrTvPage() {
   // Fetch OMDb data
   interface OMDbData {
     Ratings: {
-      Source?: string
-      Value?: string
-    }[]
-    Metascore: string
-    imdbRating: string
-    imdbVotes: string
-    imdbID: string
-    Response: string
+      Source?: string;
+      Value?: string;
+    }[];
+    Metascore: string;
+    imdbRating: string;
+    imdbVotes: string;
+    imdbID: string;
+    Response: string;
   }
 
-  const { data: omdbData, error: omdbError, isLoading: omdbIsLoading } = useSWRImmutable<OMDbData>(
+  const {
+    data: omdbData,
+    error: omdbError,
+    isLoading: omdbIsLoading,
+  } = useSWRImmutable<OMDbData>(
     imdbId ? `http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}` : null,
     fetcher,
-    { shouldRetryOnError: false }
+    { shouldRetryOnError: false },
   );
   const hasOmdbData = omdbData && omdbData.Response === "True";
   const shouldRenderOmdb = omdbIsLoading || hasOmdbData;
 
   useEffect(() => {
     if (hasOmdbData) {
-      const rt = omdbData.Ratings?.find(rating => rating.Source === "Rotten Tomatoes");
-      setMetric(prev => ({
+      const rt = omdbData.Ratings?.find(
+        (rating) => rating.Source === "Rotten Tomatoes",
+      );
+      setMetric((prev) => ({
         ...prev,
         IMDb: omdbData.imdbRating.replace(".", "") ?? undefined,
         RottenTomatoes: rt && rt?.Value?.replace("%", ""),
-        Metacritic: omdbData.Metascore ?? undefined
+        Metacritic: omdbData.Metascore ?? undefined,
       }));
     }
   }, [omdbData, hasOmdbData]);
 
   // Fetch Letterboxd data
   interface LbData {
-    type: string
-    score: number
+    type: string;
+    score: number;
     film?: {
-      name: string
-      link: string
-      rating?: number
-    }
+      name: string;
+      link: string;
+      rating?: number;
+    };
   }
 
-  const { data: lbData, error: lbError, isLoading: lbIsLoading } = useSWRImmutable<LbData>(
+  const {
+    data: lbData,
+    error: lbError,
+    isLoading: lbIsLoading,
+  } = useSWRImmutable<LbData>(
     title && tmdbId ? `/api/letterboxd?title=${title}&tmdbId=${tmdbId}` : null,
     fetcher,
-    { shouldRetryOnError: false }
+    { shouldRetryOnError: false },
   );
   const hasRatingLb = lbData?.film?.rating != null;
   const shouldRenderLb = lbIsLoading || hasRatingLb;
@@ -258,9 +293,9 @@ export default function MovieOrTvPage() {
     if (!lbData?.film?.rating) return;
 
     const ratingOutOf100 = lbData.film.rating * 20;
-    setMetric(prev => ({
+    setMetric((prev) => ({
       ...prev,
-      Letterboxd: ratingOutOf100
+      Letterboxd: ratingOutOf100,
     }));
   }, [lbData]);
 
@@ -271,30 +306,36 @@ export default function MovieOrTvPage() {
         initialProps?: {
           pageProps?: {
             initFilm?: {
-              average_rating_out_of_ten?: number
-              number_of_ratings?: number
-            }
+              average_rating_out_of_ten?: number;
+              number_of_ratings?: number;
+            };
             series?: {
-              average_rating_out_of_ten?: number
-              number_of_ratings?: number
-            }
-          }
-        }
-      }
-    }
-    url: string
+              average_rating_out_of_ten?: number;
+              number_of_ratings?: number;
+            };
+          };
+        };
+      };
+    };
+    url: string;
   }
 
-  const { data: mubiData, error: mubiError, isLoading: mubiIsLoading } = useSWRImmutable<MubiData>(
+  const {
+    data: mubiData,
+    error: mubiError,
+    isLoading: mubiIsLoading,
+  } = useSWRImmutable<MubiData>(
     title && year && mediaType === "tv"
       ? `/api/mubi?title=${title}&director=&year=${year}`
       : title && year && director?.length > 0
         ? `/api/mubi?title=${title}&director=${director[0]}&year=${year}`
         : null,
     fetcher,
-    { shouldRetryOnError: false }
+    { shouldRetryOnError: false },
   );
-  const filmDataMubi = mubiData?.nextData?.props?.initialProps?.pageProps?.initFilm || mubiData?.nextData?.props?.initialProps?.pageProps?.series;
+  const filmDataMubi =
+    mubiData?.nextData?.props?.initialProps?.pageProps?.initFilm ||
+    mubiData?.nextData?.props?.initialProps?.pageProps?.series;
   const hasRatingMubi = filmDataMubi?.average_rating_out_of_ten != null;
   const shouldRenderMubi = mubiIsLoading || hasRatingMubi;
 
@@ -302,9 +343,9 @@ export default function MovieOrTvPage() {
     if (!filmDataMubi?.average_rating_out_of_ten) return;
 
     const ratingOutOf100 = filmDataMubi.average_rating_out_of_ten * 10;
-    setMetric(prev => ({
+    setMetric((prev) => ({
       ...prev,
-      Mubi: ratingOutOf100
+      Mubi: ratingOutOf100,
     }));
   }, [mubiData]);
 
@@ -312,17 +353,23 @@ export default function MovieOrTvPage() {
   interface SerializdData {
     ratingData: {
       aggregateRating?: {
-        ratingValue?: string
-        ratingCount?: string
-      }
-    }
-    url: string
+        ratingValue?: string;
+        ratingCount?: string;
+      };
+    };
+    url: string;
   }
 
-  const { data: serializdData, error: serializdError, isLoading: serializdIsLoading } = useSWRImmutable<SerializdData>(
-    title && tmdbId && mediaType === "tv" ? `/api/serializd?title=${title}&tmdbId=${tmdbId}` : null,
+  const {
+    data: serializdData,
+    error: serializdError,
+    isLoading: serializdIsLoading,
+  } = useSWRImmutable<SerializdData>(
+    title && tmdbId && mediaType === "tv"
+      ? `/api/serializd?title=${title}&tmdbId=${tmdbId}`
+      : null,
     fetcher,
-    { shouldRetryOnError: false }
+    { shouldRetryOnError: false },
   );
   const filmDataSerializd = serializdData?.ratingData?.aggregateRating;
   const hasRatingSerializd = filmDataSerializd?.ratingValue != null;
@@ -332,26 +379,27 @@ export default function MovieOrTvPage() {
     if (!filmDataSerializd?.ratingValue) return;
 
     const ratingOutOf100 = Number(filmDataSerializd.ratingValue) * 20;
-    setMetric(prev => ({
+    setMetric((prev) => ({
       ...prev,
-      Serializd: ratingOutOf100
+      Serializd: ratingOutOf100,
     }));
   }, [serializdData, hasRatingSerializd]);
 
   // Calculate Uniscore
   useEffect(() => {
-    const done = (lbData || lbError) &&
-      (year ? (mubiData || mubiError) : true) &&
-      (imdbId ? (omdbData || omdbError) : true) &&
-      (mediaType === "tv" ? (serializdData || serializdError) : true);
+    const done =
+      (lbData || lbError) &&
+      (year ? mubiData || mubiError : true) &&
+      (imdbId ? omdbData || omdbError : true) &&
+      (mediaType === "tv" ? serializdData || serializdError : true);
 
     if (!done) return;
 
     let counter = 0;
     let total = 0;
 
-    Object.keys(metric).forEach(key => {
-      if (metric[key] && metric[key] !== 'N/A') {
+    Object.keys(metric).forEach((key) => {
+      if (metric[key] && metric[key] !== "N/A") {
         total += Number(metric[key]);
         counter++;
       }
@@ -364,21 +412,36 @@ export default function MovieOrTvPage() {
       setCount(0);
       setUniscore(-1);
     }
-  }, [metric, omdbData, omdbError, lbData, lbError, mubiData, mubiError, serializdData, serializdError, mediaType, imdbId]);
+  }, [
+    metric,
+    omdbData,
+    omdbError,
+    lbData,
+    lbError,
+    mubiData,
+    mubiError,
+    serializdData,
+    serializdError,
+    mediaType,
+    imdbId,
+  ]);
 
-  const formatPrice = (priceValue?: number | null, currencyCode?: string | null): string => {
+  const formatPrice = (
+    priceValue?: number | null,
+    currencyCode?: string | null,
+  ): string => {
     if (priceValue == null || !currencyCode) return "";
 
     return new Intl.NumberFormat("en", {
       style: "currency",
       currency: currencyCode,
       currencyDisplay: "narrowSymbol",
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(priceValue);
   };
 
   const getYear = (date: string) => {
-    return date?.split("-")[0] ?? '';
+    return date?.split("-")[0] ?? "";
   };
 
   const firstAirDate = data?.first_air_date ? getYear(data.first_air_date) : "";
@@ -391,12 +454,12 @@ export default function MovieOrTvPage() {
         : firstAirDate === lastAirDate
           ? firstAirDate
           : `${firstAirDate}\u2013${lastAirDate}`
-      : '';
+      : "";
 
-  const selectedCountry = COUNTRIES.find(option => option.value === country);
+  const selectedCountry = COUNTRIES.find((option) => option.value === country);
 
   return (
-    <div className='py-10'>
+    <div className="py-10">
       <Container>
         <Navbar
           page={"movies-and-tv"}
@@ -406,27 +469,36 @@ export default function MovieOrTvPage() {
           fetchResults={fetchResults}
         />
         {data?.title && (
-          <div className='flex gap-x-10 mt-10 flex-col lg:flex-row'>
-            <div className='flex-1'>
+          <div className="mt-10 flex flex-col gap-x-10 lg:flex-row">
+            <div className="flex-1">
               {posterUrl && (
                 <Image
                   src={posterUrl}
-                  className='rounded-[10px] border-[0.5px] border-[#606060] border-solid mx-auto'
+                  className="mx-auto rounded-[10px] border-[0.5px] border-solid border-[#606060]"
                   alt="Poster"
                   width={343}
                   height={519}
                   priority
                 />
               )}
-              <div className='flex flex-wrap gap-x-3 mt-5 mb-3 justify-center lg:justify-start'>
+              <div className="mt-5 mb-3 flex flex-wrap justify-center gap-x-3 lg:justify-start">
                 {(data.genres ?? []).map((genre, id) => {
                   return (
-                    <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
-                  )
+                    <p
+                      key={id}
+                      className="mb-3 w-fit rounded-[10px] border-[0.5px] border-solid border-[#606060] bg-[#18191D] px-4 py-2 !text-white"
+                    >
+                      {genre.name}
+                    </p>
+                  );
                 })}
               </div>
               {trailerUrl && (
-                <a href={trailerUrl} target="_blank" className='flex gap-x-3 bg-[#AA1B63] w-fit mx-auto px-4 py-2 rounded-full mb-5 lg:mb-0'>
+                <a
+                  href={trailerUrl}
+                  target="_blank"
+                  className="mx-auto mb-5 flex w-fit gap-x-3 rounded-full bg-[#AA1B63] px-4 py-2 lg:mb-0"
+                >
                   <Image
                     src="/icons/play-button-icon.svg"
                     width={24}
@@ -443,10 +515,10 @@ export default function MovieOrTvPage() {
                 </a>
               )}
             </div>
-            <div className='flex-2 [&>p]:my-5'>
-              <div className='flex justify-between'>
+            <div className="flex-2 [&>p]:my-5">
+              <div className="flex justify-between">
                 <h1>{data.title}</h1>
-                <div className="flex items-center justify-center mt-10 ml-13 h-0">
+                <div className="mt-10 ml-13 flex h-0 items-center justify-center">
                   <Image
                     src="/icons/hexagon.svg"
                     alt=""
@@ -454,12 +526,21 @@ export default function MovieOrTvPage() {
                     height={91}
                     aria-hidden
                     draggable={false}
-                    className={`absolute ${count > -1 ? (count === 0 ? "hidden" : "inline-block") : "inline-block"
-                      } mt-10`}
+                    className={`absolute ${
+                      count > -1
+                        ? count === 0
+                          ? "hidden"
+                          : "inline-block"
+                        : "inline-block"
+                    } mt-10`}
                   />
-                  <h1 className="relative z-10 text-white mt-10">
+                  <h1 className="relative z-10 mt-10 text-white">
                     {count > -1 ? (
-                      count === 0 ? "" : uniscore
+                      count === 0 ? (
+                        ""
+                      ) : (
+                        uniscore
+                      )
                     ) : (
                       <Image
                         src="/icons/loading-spinner.gif"
@@ -472,7 +553,7 @@ export default function MovieOrTvPage() {
                   </h1>
                 </div>
               </div>
-              <p className='!mt-4'>
+              <p className="!mt-4">
                 {`${!data.release_date ? "" : ` ${data.release_date?.split("-")[0]}`} ${data.genres?.length ? `• ${data.genres[0].name}` : ""} ${data?.runtime ? `• ${data.runtime} min` : ""}`}
               </p>
               <p>
@@ -484,11 +565,9 @@ export default function MovieOrTvPage() {
                   ""
                 )}
               </p>
-              <p>
-                {data.tagline ? data.tagline : ""}
-              </p>
+              <p>{data.tagline ? data.tagline : ""}</p>
               <div>
-                <div className='[&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-[#606060] [&_div]:border-solid [&_div]:bg-[#18191D] [&_div]:w-fit [&_div]:py-4 [&_div]:px-5 [&_div]:justify-center [&_div]:flex [&_div]:flex-col [&_div]:items-center [&_div]:gap-y-1 flex gap-x-4 my-7 flex flex-wrap gap-y-4'>
+                <div className="my-7 flex flex-wrap gap-x-4 gap-y-4 [&_div]:flex [&_div]:w-fit [&_div]:flex-col [&_div]:items-center [&_div]:justify-center [&_div]:gap-y-1 [&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-solid [&_div]:border-[#606060] [&_div]:bg-[#18191D] [&_div]:px-5 [&_div]:py-4">
                   {!omdbError && shouldRenderOmdb && (
                     <>
                       {/* IMDb */}
@@ -501,25 +580,35 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                          <Image
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
+                          />
                         </div>
-                      ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && imdbId && (
-                        <a
-                          href={`https://www.imdb.com/title/${imdbId}/`}
-                          target='_blank'
-                          rel="noopener noreferrer"
-                        >
-                          <div>
-                            <Image
-                              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                              alt="IMDb Logo"
-                              width={70}
-                              height={70}
-                              priority
-                            />
-                            <h1>{omdbData.imdbRating}</h1>
-                          </div>
-                        </a>
+                      ) : (
+                        omdbData?.imdbRating &&
+                        omdbData.imdbRating !== "N/A" &&
+                        imdbId && (
+                          <a
+                            href={`https://www.imdb.com/title/${imdbId}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <div>
+                              <Image
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                                alt="IMDb Logo"
+                                width={70}
+                                height={70}
+                                priority
+                              />
+                              <h1>{omdbData.imdbRating}</h1>
+                            </div>
+                          </a>
+                        )
                       )}
 
                       {/* Metacritic */}
@@ -532,19 +621,28 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        </div>
-                      ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
-                        <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                            alt="Metacritic Logo"
-                            width={70}
-                            height={70}
-                            priority
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
                           />
-                          <h1>{omdbData.Metascore}</h1>
                         </div>
+                      ) : (
+                        omdbData?.Metascore &&
+                        omdbData.Metascore !== "N/A" && (
+                          <div>
+                            <Image
+                              src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                              alt="Metacritic Logo"
+                              width={70}
+                              height={70}
+                              priority
+                            />
+                            <h1>{omdbData.Metascore}</h1>
+                          </div>
+                        )
                       )}
 
                       {/* Rotten Tomatoes */}
@@ -557,26 +655,37 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        </div>
-                      ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
-                        <div key={index}>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                            alt="Rotten Tomatoes Logo"
-                            width={70}
-                            height={70}
-                            priority
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
                           />
-                          <h1>{rating.Value}</h1>
                         </div>
+                      ) : (
+                        omdbData?.Ratings?.map(
+                          (rating, index) =>
+                            rating.Source === "Rotten Tomatoes" && (
+                              <div key={index}>
+                                <Image
+                                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                                  alt="Rotten Tomatoes Logo"
+                                  width={70}
+                                  height={70}
+                                  priority
+                                />
+                                <h1>{rating.Value}</h1>
+                              </div>
+                            ),
+                        )
                       )}
                     </>
                   )}
                   {!lbError && shouldRenderLb && (
                     <a
                       href={lbData?.film?.link ?? "#"}
-                      target='_blank'
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <div>
@@ -588,33 +697,48 @@ export default function MovieOrTvPage() {
                           priority
                         />
                         <h1>
-                          {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
-                            hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
+                          {lbIsLoading ? (
+                            <Image
+                              src="/icons/loading-spinner.gif"
+                              width={50}
+                              height={50}
+                              alt="Loading Spinner"
+                              unoptimized
+                            />
+                          ) : hasRatingLb && lbData?.film?.rating ? (
+                            ` ${lbData.film.rating.toFixed(1)}`
+                          ) : null}
                         </h1>
                       </div>
                     </a>
                   )}
                   {!mubiError && shouldRenderMubi && (
                     <a
-                      href={mubiData?.url ?? '#'}
-                      target='_blank'
+                      href={mubiData?.url ?? "#"}
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <div>
                         <Image
                           src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
-                          className='rounded-[10px]'
+                          className="rounded-[10px]"
                           alt="Mubi Logo"
                           width={70}
                           height={70}
                           priority
                         />
                         <h1>
-                          {mubiIsLoading
-                            ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                            : hasRatingMubi
-                              ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
-                              : null}
+                          {mubiIsLoading ? (
+                            <Image
+                              src="/icons/loading-spinner.gif"
+                              width={50}
+                              height={50}
+                              alt="Loading Spinner"
+                              unoptimized
+                            />
+                          ) : hasRatingMubi ? (
+                            ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
+                          ) : null}
                         </h1>
                       </div>
                     </a>
@@ -624,7 +748,7 @@ export default function MovieOrTvPage() {
               {jwIsLoading ? (
                 <Image
                   src="/icons/loading-spinner.gif"
-                  className='mt-7'
+                  className="mt-7"
                   width={50}
                   height={50}
                   alt="Loading Spinner"
@@ -632,31 +756,33 @@ export default function MovieOrTvPage() {
                 />
               ) : (
                 <div>
-                  <div className="flex items-center gap-x-4 my-5">
+                  <div className="my-5 flex items-center gap-x-4">
                     <h2>Where to Watch</h2>
                     <CountrySelector
-                      id={'countries'}
+                      id={"countries"}
                       open={isOpen}
                       onToggle={() => setIsOpen(!isOpen)}
-                      onChange={val => setCountry(val)}
+                      onChange={(val) => setCountry(val)}
                       selectedValue={selectedCountry as SelectMenuOption}
                     />
                   </div>
 
-                  {jwError || !services || (
-                    (!services.stream?.length &&
-                      !services.rent?.length &&
-                      !services.buy?.length)
-                  ) || !hasJwData ? (
+                  {jwError ||
+                  !services ||
+                  (!services.stream?.length &&
+                    !services.rent?.length &&
+                    !services.buy?.length) ||
+                  !hasJwData ? (
                     <p className="my-4">
-                      No offers available for {selectedCountry?.title ?? "your country"}.
+                      No offers available for{" "}
+                      {selectedCountry?.title ?? "your country"}.
                     </p>
                   ) : (
                     <div className="space-y-7">
                       {/* Stream */}
                       {services?.stream?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Stream</p>
+                          <p className="w-20 shrink-0 py-6">Stream</p>
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.stream.map((service, i) => (
                               <a
@@ -664,7 +790,7 @@ export default function MovieOrTvPage() {
                                 key={`stream-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}
@@ -685,7 +811,7 @@ export default function MovieOrTvPage() {
                       {/* Rent */}
                       {services?.rent?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Rent</p>
+                          <p className="w-20 shrink-0 py-6">Rent</p>
 
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.rent.map((service, i) => (
@@ -694,7 +820,7 @@ export default function MovieOrTvPage() {
                                 key={`rent-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}
@@ -703,9 +829,8 @@ export default function MovieOrTvPage() {
                                   height={70}
                                   alt={`${service.package.name} Logo`}
                                 />
-                                <span className="text-sm mt-2">
+                                <span className="mt-2 text-sm">
                                   {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"}${formatPrice(service.price_value, service.price_currency) ? ` • ${formatPrice(service.price_value, service.price_currency)}` : ""}`}
-
                                 </span>
                               </a>
                             ))}
@@ -716,7 +841,7 @@ export default function MovieOrTvPage() {
                       {/* Buy */}
                       {services?.buy?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Buy</p>
+                          <p className="w-20 shrink-0 py-6">Buy</p>
 
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.buy.map((service, i) => (
@@ -725,7 +850,7 @@ export default function MovieOrTvPage() {
                                 key={`buy-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}
@@ -751,28 +876,36 @@ export default function MovieOrTvPage() {
         )}
 
         {data?.name && (
-          <div className='flex gap-x-10 mt-10 flex-col lg:flex-row'>
-            <div className='flex-1'>
+          <div className="mt-10 flex flex-col gap-x-10 lg:flex-row">
+            <div className="flex-1">
               {posterUrl && (
                 <Image
                   src={posterUrl}
-                  className='rounded-[10px] border-[0.5px] border-[#606060] border-solid mx-auto'
+                  className="mx-auto rounded-[10px] border-[0.5px] border-solid border-[#606060]"
                   alt="Poster"
                   width={300}
                   height={444}
                   priority
                 />
               )}
-              <div className='flex flex-wrap gap-x-3 mt-5 mb-3 justify-center lg:justify-start'>
+              <div className="mt-5 mb-3 flex flex-wrap justify-center gap-x-3 lg:justify-start">
                 {(data.genres ?? []).map((genre, id) => {
                   return (
-                    <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
-                  )
-                })
-                }
+                    <p
+                      key={id}
+                      className="mb-3 w-fit rounded-[10px] border-[0.5px] border-solid border-[#606060] bg-[#18191D] px-4 py-2 !text-white"
+                    >
+                      {genre.name}
+                    </p>
+                  );
+                })}
               </div>
               {trailerUrl && (
-                <a href={trailerUrl} target="_blank" className='flex gap-x-3 bg-[#AA1B63] w-fit mx-auto px-4 py-2 rounded-full mb-5 lg:mb-0'>
+                <a
+                  href={trailerUrl}
+                  target="_blank"
+                  className="mx-auto mb-5 flex w-fit gap-x-3 rounded-full bg-[#AA1B63] px-4 py-2 lg:mb-0"
+                >
                   <Image
                     src="/icons/play-button-icon.svg"
                     width={24}
@@ -789,10 +922,10 @@ export default function MovieOrTvPage() {
                 </a>
               )}
             </div>
-            <div className='flex-2 [&>p]:my-5'>
-              <div className='flex justify-between'>
+            <div className="flex-2 [&>p]:my-5">
+              <div className="flex justify-between">
                 <h1>{data.name}</h1>
-                <div className="flex items-center justify-center mt-10 ml-13 h-0">
+                <div className="mt-10 ml-13 flex h-0 items-center justify-center">
                   <Image
                     src="/icons/hexagon.svg"
                     alt=""
@@ -800,12 +933,21 @@ export default function MovieOrTvPage() {
                     height={91}
                     aria-hidden
                     draggable={false}
-                    className={`absolute ${count > -1 ? (count === 0 ? "hidden" : "inline-block") : "inline-block"
-                      } mt-10`}
+                    className={`absolute ${
+                      count > -1
+                        ? count === 0
+                          ? "hidden"
+                          : "inline-block"
+                        : "inline-block"
+                    } mt-10`}
                   />
-                  <h1 className="relative z-10 text-white mt-10">
+                  <h1 className="relative z-10 mt-10 text-white">
                     {count > -1 ? (
-                      count === 0 ? "" : uniscore
+                      count === 0 ? (
+                        ""
+                      ) : (
+                        uniscore
+                      )
                     ) : (
                       <Image
                         src="/icons/loading-spinner.gif"
@@ -818,14 +960,15 @@ export default function MovieOrTvPage() {
                   </h1>
                 </div>
               </div>
-              <p className='!mt-4'>
+              <p className="!mt-4">
                 {`
-                ${yearRange !== '' ? ` ${yearRange}` : ''}
-                ${data?.genres?.length ? ` • ${data.genres[0].name}` : ''}
-                ${data?.number_of_seasons
-                    ? ` • ${data.number_of_seasons} season${data.number_of_seasons > 1 ? 's' : ''}`
-                    : ''
-                  }
+                ${yearRange !== "" ? ` ${yearRange}` : ""}
+                ${data?.genres?.length ? ` • ${data.genres[0].name}` : ""}
+                ${
+                  data?.number_of_seasons
+                    ? ` • ${data.number_of_seasons} season${data.number_of_seasons > 1 ? "s" : ""}`
+                    : ""
+                }
               `}
               </p>
               <p>
@@ -837,11 +980,9 @@ export default function MovieOrTvPage() {
                   ""
                 )}
               </p>
-              <p>
-                {data.tagline ? data.tagline : ""}
-              </p>
+              <p>{data.tagline ? data.tagline : ""}</p>
               <div>
-                <div className='[&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-[#606060] [&_div]:border-solid [&_div]:bg-[#18191D] [&_div]:w-fit [&_div]:py-4 [&_div]:px-5 [&_div]:justify-center [&_div]:flex [&_div]:flex-col [&_div]:items-center [&_div]:gap-y-1 flex gap-x-4 my-7 flex flex-wrap gap-y-4'>
+                <div className="my-7 flex flex-wrap gap-x-4 gap-y-4 [&_div]:flex [&_div]:w-fit [&_div]:flex-col [&_div]:items-center [&_div]:justify-center [&_div]:gap-y-1 [&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-solid [&_div]:border-[#606060] [&_div]:bg-[#18191D] [&_div]:px-5 [&_div]:py-4">
                   {!omdbError && shouldRenderOmdb && (
                     <>
                       {/* IMDb */}
@@ -854,25 +995,35 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                          <Image
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
+                          />
                         </div>
-                      ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && imdbId && (
-                        <a
-                          href={`https://www.imdb.com/title/${imdbId}/`}
-                          target='_blank'
-                          rel="noopener noreferrer"
-                        >
-                          <div>
-                            <Image
-                              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                              alt="IMDb Logo"
-                              width={70}
-                              height={70}
-                              priority
-                            />
-                            <h1>{omdbData.imdbRating}</h1>
-                          </div>
-                        </a>
+                      ) : (
+                        omdbData?.imdbRating &&
+                        omdbData.imdbRating !== "N/A" &&
+                        imdbId && (
+                          <a
+                            href={`https://www.imdb.com/title/${imdbId}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <div>
+                              <Image
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                                alt="IMDb Logo"
+                                width={70}
+                                height={70}
+                                priority
+                              />
+                              <h1>{omdbData.imdbRating}</h1>
+                            </div>
+                          </a>
+                        )
                       )}
 
                       {/* Metacritic */}
@@ -885,19 +1036,28 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        </div>
-                      ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
-                        <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                            alt="Metacritic Logo"
-                            width={70}
-                            height={70}
-                            priority
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
                           />
-                          <h1>{omdbData.Metascore}</h1>
                         </div>
+                      ) : (
+                        omdbData?.Metascore &&
+                        omdbData.Metascore !== "N/A" && (
+                          <div>
+                            <Image
+                              src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                              alt="Metacritic Logo"
+                              width={70}
+                              height={70}
+                              priority
+                            />
+                            <h1>{omdbData.Metascore}</h1>
+                          </div>
+                        )
                       )}
 
                       {/* Rotten Tomatoes */}
@@ -910,26 +1070,37 @@ export default function MovieOrTvPage() {
                             height={70}
                             priority
                           />
-                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        </div>
-                      ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
-                        <div key={index}>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                            alt="Rotten Tomatoes Logo"
-                            width={70}
-                            height={70}
-                            priority
+                            src="/icons/loading-spinner.gif"
+                            width={50}
+                            height={50}
+                            alt="Loading Spinner"
+                            unoptimized
                           />
-                          <h1>{rating.Value}</h1>
                         </div>
+                      ) : (
+                        omdbData?.Ratings?.map(
+                          (rating, index) =>
+                            rating.Source === "Rotten Tomatoes" && (
+                              <div key={index}>
+                                <Image
+                                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                                  alt="Rotten Tomatoes Logo"
+                                  width={70}
+                                  height={70}
+                                  priority
+                                />
+                                <h1>{rating.Value}</h1>
+                              </div>
+                            ),
+                        )
                       )}
                     </>
                   )}
                   {!lbError && shouldRenderLb && (
                     <a
                       href={lbData?.film?.link ?? "#"}
-                      target='_blank'
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <div>
@@ -941,41 +1112,56 @@ export default function MovieOrTvPage() {
                           priority
                         />
                         <h1>
-                          {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
-                            hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
+                          {lbIsLoading ? (
+                            <Image
+                              src="/icons/loading-spinner.gif"
+                              width={50}
+                              height={50}
+                              alt="Loading Spinner"
+                              unoptimized
+                            />
+                          ) : hasRatingLb && lbData?.film?.rating ? (
+                            ` ${lbData.film.rating.toFixed(1)}`
+                          ) : null}
                         </h1>
                       </div>
                     </a>
                   )}
                   {!mubiError && shouldRenderMubi && (
                     <a
-                      href={mubiData?.url ?? '#'}
-                      target='_blank'
+                      href={mubiData?.url ?? "#"}
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <div>
                         <Image
                           src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
-                          className='rounded-[10px]'
+                          className="rounded-[10px]"
                           alt="Mubi Logo"
                           width={70}
                           height={70}
                           priority
                         />
                         <h1>
-                          {mubiIsLoading
-                            ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                            : hasRatingMubi
-                              ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
-                              : null}
+                          {mubiIsLoading ? (
+                            <Image
+                              src="/icons/loading-spinner.gif"
+                              width={50}
+                              height={50}
+                              alt="Loading Spinner"
+                              unoptimized
+                            />
+                          ) : hasRatingMubi ? (
+                            ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
+                          ) : null}
                         </h1>
                       </div>
                     </a>
                   )}
                   {!serializdError && shouldRenderSerializd && (
                     <a
-                      href={serializdData?.url ?? '#'}
-                      target='_blank'
+                      href={serializdData?.url ?? "#"}
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <div>
@@ -987,11 +1173,17 @@ export default function MovieOrTvPage() {
                           priority
                         />
                         <h1>
-                          {serializdIsLoading
-                            ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                            : hasRatingSerializd
-                              ? ` ${filmDataSerializd.ratingValue}`
-                              : null}
+                          {serializdIsLoading ? (
+                            <Image
+                              src="/icons/loading-spinner.gif"
+                              width={50}
+                              height={50}
+                              alt="Loading Spinner"
+                              unoptimized
+                            />
+                          ) : hasRatingSerializd ? (
+                            ` ${filmDataSerializd.ratingValue}`
+                          ) : null}
                         </h1>
                       </div>
                     </a>
@@ -1001,7 +1193,7 @@ export default function MovieOrTvPage() {
               {jwIsLoading ? (
                 <Image
                   src="/icons/loading-spinner.gif"
-                  className='mt-7'
+                  className="mt-7"
                   width={50}
                   height={50}
                   alt="Loading Spinner"
@@ -1009,31 +1201,33 @@ export default function MovieOrTvPage() {
                 />
               ) : (
                 <div>
-                  <div className="flex items-center gap-x-4 my-5">
+                  <div className="my-5 flex items-center gap-x-4">
                     <h2>Where to Watch</h2>
                     <CountrySelector
-                      id={'countries'}
+                      id={"countries"}
                       open={isOpen}
                       onToggle={() => setIsOpen(!isOpen)}
-                      onChange={val => setCountry(val)}
+                      onChange={(val) => setCountry(val)}
                       selectedValue={selectedCountry as SelectMenuOption}
                     />
                   </div>
 
-                  {jwError || !services || (
-                    (!services.stream?.length &&
-                      !services.rent?.length &&
-                      !services.buy?.length)
-                  ) || !hasJwData ? (
+                  {jwError ||
+                  !services ||
+                  (!services.stream?.length &&
+                    !services.rent?.length &&
+                    !services.buy?.length) ||
+                  !hasJwData ? (
                     <p className="my-4">
-                      No offers available for {selectedCountry?.title ?? "your country"}.
+                      No offers available for{" "}
+                      {selectedCountry?.title ?? "your country"}.
                     </p>
                   ) : (
                     <div className="space-y-7">
                       {/* Stream */}
                       {services?.stream?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Stream</p>
+                          <p className="w-20 shrink-0 py-6">Stream</p>
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.stream.map((service, i) => (
                               <a
@@ -1041,7 +1235,7 @@ export default function MovieOrTvPage() {
                                 key={`stream-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}
@@ -1062,7 +1256,7 @@ export default function MovieOrTvPage() {
                       {/* Rent */}
                       {services?.rent?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Rent</p>
+                          <p className="w-20 shrink-0 py-6">Rent</p>
 
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.rent.map((service, i) => (
@@ -1071,7 +1265,7 @@ export default function MovieOrTvPage() {
                                 key={`rent-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}
@@ -1080,7 +1274,7 @@ export default function MovieOrTvPage() {
                                   height={70}
                                   alt={`${service.package.name} Logo`}
                                 />
-                                <span className="text-sm mt-2">
+                                <span className="mt-2 text-sm">
                                   {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
                                 </span>
                               </a>
@@ -1092,7 +1286,7 @@ export default function MovieOrTvPage() {
                       {/* Buy */}
                       {services?.buy?.length > 0 && (
                         <div className="flex items-start">
-                          <p className="py-6 w-20 shrink-0">Buy</p>
+                          <p className="w-20 shrink-0 py-6">Buy</p>
 
                           <div className="flex flex-wrap gap-x-7 gap-y-4">
                             {services.buy.map((service, i) => (
@@ -1101,7 +1295,7 @@ export default function MovieOrTvPage() {
                                 key={`buy-${i}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center w-[70px] text-center"
+                                className="flex w-[70px] flex-col items-center text-center"
                               >
                                 <Image
                                   src={service.package.icon}

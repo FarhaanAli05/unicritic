@@ -1,19 +1,29 @@
-'use client';
+"use client";
 
-import Container from '@/components/Container';
-import Link from 'next/link';
-import Image from 'next/image';
+import Container from "@/components/Container";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function MoviesAndTv() {
   return (
     <div>
-      <Container className='flex items-center justify-center h-screen flex-col gap-y-5'>
+      <Container className="flex h-screen flex-col items-center justify-center gap-y-5">
         <nav className="absolute top-10">
-          <ul className="flex justify-end items-center gap-x-5">
-            <li><Link href={"/movies-and-tv"}>Movies & TV</Link></li>
-            <li><Link href={"/music"}>Music</Link></li>
-            <li><Link className="font-bold" href={"/games"}>Games</Link></li>
-            <li><Link href={"/books"}>Books</Link></li>
+          <ul className="flex items-center justify-end gap-x-5">
+            <li>
+              <Link href={"/movies-and-tv"}>Movies & TV</Link>
+            </li>
+            <li>
+              <Link href={"/music"}>Music</Link>
+            </li>
+            <li>
+              <Link className="font-bold" href={"/games"}>
+                Games
+              </Link>
+            </li>
+            <li>
+              <Link href={"/books"}>Books</Link>
+            </li>
           </ul>
         </nav>
         <Link href={"/movies-and-tv"} className="flex items-center gap-x-3">
@@ -26,7 +36,7 @@ export default function MoviesAndTv() {
           />
           <h1>Unicritic</h1>
         </Link>
-        <p className='mt-5 lg:mt-0 text-center'>Coming soon!</p>
+        <p className="mt-5 text-center lg:mt-0">Coming soon!</p>
       </Container>
     </div>
   );
