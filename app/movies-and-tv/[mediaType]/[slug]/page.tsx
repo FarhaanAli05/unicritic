@@ -245,7 +245,7 @@ export default function MovieOrTvPage() {
     error: omdbError,
     isLoading: omdbIsLoading,
   } = useSWRImmutable<OMDbData>(
-    imdbId ? `http://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}` : null,
+    imdbId ? `https://www.omdbapi.com/?apikey=${omdbApiKey}&i=${imdbId}` : null,
     fetcher,
     { shouldRetryOnError: false },
   );
