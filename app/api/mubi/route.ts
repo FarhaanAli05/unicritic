@@ -83,10 +83,10 @@ const findBestMatch = async (
   title: string,
   year: number,
 ) => {
-  console.log(data);
+  // console.log(data);
   const items = data.search.films;
   let match = items.find((item) => {
-    console.log(item.title, title, item.title.includes(title));
+    // console.log(item.title, title, item.title.includes(title));
     return (
       (item.title.includes(title) || title?.includes(item.title)) &&
       year === item.year
@@ -97,7 +97,7 @@ const findBestMatch = async (
   } else {
     const yearApprox = { [year - 1]: true, [year]: true, [year + 1]: true };
     match = items.find((item) => {
-      console.log(item.title, title, item.title.includes(title));
+      // console.log(item.title, title, item.title.includes(title));
       return (
         (item.title.includes(title) || title?.includes(item.title)) &&
         yearApprox[item.year]
@@ -108,8 +108,8 @@ const findBestMatch = async (
     } else {
       const cleanedTitle = normalize(title);
       match = items.find((item) => {
-        console.log("item:", item);
-        console.log(item.title, title, item.title.includes(title));
+        // console.log("item:", item);
+        // console.log(item.title, title, item.title.includes(title));
         const cleanedItem = normalize(item.title);
         return (
           (cleanedItem.includes(cleanedTitle) ||
