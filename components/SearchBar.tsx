@@ -29,7 +29,7 @@ export default function SearchBar({ page, goToDetails, results, setResults, fetc
   }, [debouncedSearch]);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full mb-[-20] lg:mb-0">
       <div className="bg-[#18191D] border-[0.5px] border-[#606060] rounded-[10px] flex items-center px-3">
         <Image
           src="/icons/magnifying-glass.svg"

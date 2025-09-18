@@ -81,7 +81,7 @@ export default function CountrySelector({
         <button
           type="button"
           className={`${disabled ? "bg-neutral-100" : "bg-[#18191D]"
-            } flex items-center gap-3 rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-3 pr-8 cursor-pointer`}
+            } flex items-center gap-3 rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit min-w-[92px] py-2 px-3 pr-8 cursor-pointer`}
           aria-haspopup="listbox"
           aria-expanded="true"
           aria-labelledby="listbox-label"
@@ -96,7 +96,8 @@ export default function CountrySelector({
               className={"inline mr-2 h-4 rounded-sm"}
               alt={`${selectedValue.value}`}
             />
-            {selectedValue.title}
+            <div className="sm:block hidden">{selectedValue.title}</div>
+            <div className="sm:hidden block">{selectedValue.value}</div>
           </span>
           <span
             className={`absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none ${disabled ? "hidden" : ""
@@ -125,7 +126,7 @@ export default function CountrySelector({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.05 }}
-              className="absolute z-10 mt-1 bg-[#18191D] border border-[#606060] rounded-[10px] overflow-auto w-70"
+              className="absolute z-10 mt-1 bg-[#18191D] border border-[#606060] rounded-[10px] overflow-auto w-60 sm:w-70 right-0 sm:left-0"
               tabIndex={-1}
               role="listbox"
               aria-labelledby="listbox-label"

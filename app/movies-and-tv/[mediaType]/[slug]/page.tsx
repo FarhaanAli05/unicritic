@@ -13,6 +13,7 @@ import { COUNTRIES } from '@/components/country-picker/countries';
 import CountrySelector from '@/components/country-picker/selector';
 import { useCountry } from '@/components/CountryProvider';
 import Navbar from '@/components/Navbar';
+import Container from '@/components/Container';
 
 interface Metric {
   [key: string]: any
@@ -361,118 +362,443 @@ export default function MovieOrTvPage() {
   const selectedCountry = COUNTRIES.find(option => option.value === country);
 
   return (
-    <div className='max-w-250 mx-auto py-10'>
-      <Navbar
-        page={"movies-and-tv"}
-        goToDetails={goToDetails}
-        results={results}
-        setResults={setResults}
-        fetchResults={fetchResults}
-      />
-      {data?.title && (
-        <div className='flex gap-x-10 mt-10'>
-          <div className='flex-[1]'>
-            {posterUrl && (
-              <Image
-                src={posterUrl}
-                className='rounded-[10px] border-[0.5px] border-[#606060] border-solid'
-                alt="Poster"
-                width={343}
-                height={519}
-                priority
-              />
-            )}
-            <div className='flex flex-wrap gap-x-3 mt-5 mb-2'>
-              {data.genres.length > 0 && data.genres.map((genre, id) => {
-                return (
-                  <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
-                )
-              })}
-            </div>
-            {trailerUrl && (
-              <a href={trailerUrl} target="_blank" className='flex gap-x-3 bg-[#AA1B63] w-fit mx-auto px-4 py-2 rounded-full'>
+    <div className='py-10'>
+      <Container>
+        <Navbar
+          page={"movies-and-tv"}
+          goToDetails={goToDetails}
+          results={results}
+          setResults={setResults}
+          fetchResults={fetchResults}
+        />
+        {data?.title && (
+          <div className='flex gap-x-10 mt-10 flex-col lg:flex-row'>
+            <div className='flex-1'>
+              {posterUrl && (
                 <Image
-                  src="/icons/play-button-icon.svg"
-                  width={24}
-                  height={24}
-                  alt="Play Button Icon"
+                  src={posterUrl}
+                  className='rounded-[10px] border-[0.5px] border-[#606060] border-solid mx-auto'
+                  alt="Poster"
+                  width={343}
+                  height={519}
+                  priority
                 />
-                <h2>Play Trailer</h2>
-                <Image
-                  src="/icons/arrow-right.svg"
-                  width={13}
-                  height={7}
-                  alt="Right Arrow"
-                />
-              </a>
-            )}
-          </div>
-          <div className='flex-2 [&>p]:my-5'>
-            <div className='flex justify-between'>
-              <h1>{data.title}</h1>
-              <div className="flex items-center justify-center mt-10 ml-13 h-0">
-                <Image
-                  src="/icons/hexagon.svg"
-                  alt=""
-                  width={95}
-                  height={91}
-                  aria-hidden
-                  draggable={false}
-                  className={`absolute ${count > -1 ? (count === 0 ? "hidden" : "inline-block") : "inline-block"
-                    } mt-10`}
-                />
-                <h1 className="relative z-10 text-white mt-10">
-                  {count > -1 ? (
-                    count === 0 ? "" : uniscore
-                  ) : (
-                    <Image
-                      src="/icons/loading-spinner.gif"
-                      width={50}
-                      height={50}
-                      alt="Loading Spinner"
-                      unoptimized
-                    />
-                  )}
-                </h1>
-              </div>
-            </div>
-            <p className='!mt-4'>
-              {`${!data.release_date ? "" : ` ${data.release_date?.split("-")[0]}`} ${data.genres.length > 0 ? `• ${data.genres[0].name}` : ""} ${data?.runtime > 0 ? `• ${data?.runtime} min` : ""}`}
-            </p>
-            <p>
-              {director.length > 0 ? (
-                <>
-                  Directed by <strong>{director.join(", ")}</strong>
-                </>
-              ) : (
-                ""
               )}
-            </p>
-            <p>
-              {data.tagline ? data.tagline : ""}
-            </p>
-            <div>
-              <div className='[&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-[#606060] [&_div]:border-solid [&_div]:bg-[#18191D] [&_div]:w-fit [&_div]:py-4 [&_div]:px-5 [&_div]:justify-center [&_div]:flex [&_div]:flex-col [&_div]:items-center flex gap-x-4 mt-6'>
-                {!omdbError && shouldRenderOmdb && (
+              <div className='flex flex-wrap gap-x-3 mt-5 mb-3 justify-center lg:justify-start'>
+                {data.genres.length > 0 && data.genres.map((genre, id) => {
+                  return (
+                    <p key={id} className='!text-white rounded-[10px] border-[0.5px] border-[#606060] border-solid w-fit py-2 px-4 bg-[#18191D] mb-3'>{genre.name}</p>
+                  )
+                })}
+              </div>
+              {trailerUrl && (
+                <a href={trailerUrl} target="_blank" className='flex gap-x-3 bg-[#AA1B63] w-fit mx-auto px-4 py-2 rounded-full mb-5 lg:mb-0'>
+                  <Image
+                    src="/icons/play-button-icon.svg"
+                    width={24}
+                    height={24}
+                    alt="Play Button Icon"
+                  />
+                  <h2>Play Trailer</h2>
+                  <Image
+                    src="/icons/arrow-right.svg"
+                    width={13}
+                    height={7}
+                    alt="Right Arrow"
+                  />
+                </a>
+              )}
+            </div>
+            <div className='flex-2 [&>p]:my-5'>
+              <div className='flex justify-between'>
+                <h1>{data.title}</h1>
+                <div className="flex items-center justify-center mt-10 ml-13 h-0">
+                  <Image
+                    src="/icons/hexagon.svg"
+                    alt=""
+                    width={95}
+                    height={91}
+                    aria-hidden
+                    draggable={false}
+                    className={`absolute ${count > -1 ? (count === 0 ? "hidden" : "inline-block") : "inline-block"
+                      } mt-10`}
+                  />
+                  <h1 className="relative z-10 text-white mt-10">
+                    {count > -1 ? (
+                      count === 0 ? "" : uniscore
+                    ) : (
+                      <Image
+                        src="/icons/loading-spinner.gif"
+                        width={50}
+                        height={50}
+                        alt="Loading Spinner"
+                        unoptimized
+                      />
+                    )}
+                  </h1>
+                </div>
+              </div>
+              <p className='!mt-4'>
+                {`${!data.release_date ? "" : ` ${data.release_date?.split("-")[0]}`} ${data.genres.length > 0 ? `• ${data.genres[0].name}` : ""} ${data?.runtime > 0 ? `• ${data?.runtime} min` : ""}`}
+              </p>
+              <p>
+                {director.length > 0 ? (
                   <>
-                    {/* IMDb */}
-                    {omdbIsLoading ? (
+                    Directed by <strong>{director.join(", ")}</strong>
+                  </>
+                ) : (
+                  ""
+                )}
+              </p>
+              <p>
+                {data.tagline ? data.tagline : ""}
+              </p>
+              <div>
+                <div className='[&_div]:rounded-[10px] [&_div]:border-[0.5px] [&_div]:border-[#606060] [&_div]:border-solid [&_div]:bg-[#18191D] [&_div]:w-fit [&_div]:py-4 [&_div]:px-5 [&_div]:justify-center [&_div]:flex [&_div]:flex-col [&_div]:items-center [&_div]:gap-y-1 flex gap-x-4 my-7 flex flex-wrap gap-y-4'>
+                  {!omdbError && shouldRenderOmdb && (
+                    <>
+                      {/* IMDb */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                            alt="IMDb Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && imdbId && (
+                        <a
+                          href={`https://www.imdb.com/title/${imdbId}/`}
+                          target='_blank'
+                          rel="noopener noreferrer"
+                        >
+                          <div>
+                            <Image
+                              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                              alt="IMDb Logo"
+                              width={70}
+                              height={70}
+                              priority
+                            />
+                            <h1>{omdbData.imdbRating}</h1>
+                          </div>
+                        </a>
+                      )}
+
+                      {/* Metacritic */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            alt="Metacritic Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            alt="Metacritic Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <h1>{omdbData.Metascore}</h1>
+                        </div>
+                      )}
+
+                      {/* Rotten Tomatoes */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            alt="Rotten Tomatoes Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
+                        <div key={index}>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            alt="Rotten Tomatoes Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <h1>{rating.Value}</h1>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {!lbError && shouldRenderLb && (
+                    <a
+                      href={lbData?.film?.link ?? "#"}
+                      target='_blank'
+                      rel="noopener noreferrer"
+                    >
                       <div>
                         <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                          alt="IMDb Logo"
+                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                          alt="Letterboxd Logo"
                           width={70}
                           height={70}
                           priority
                         />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        <h1>
+                          {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
+                            hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
+                        </h1>
                       </div>
-                    ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && imdbId && (
-                      <a
-                        href={`https://www.imdb.com/title/${imdbId}/`}
-                        target='_blank'
-                        rel="noopener noreferrer"
-                      >
+                    </a>
+                  )}
+                  {!mubiError && shouldRenderMubi && (
+                    <a
+                      href={mubiData?.url ?? '#'}
+                      target='_blank'
+                      rel="noopener noreferrer"
+                    >
+                      <div>
+                        <Image
+                          src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                          className='rounded-[10px]'
+                          alt="Mubi Logo"
+                          width={70}
+                          height={70}
+                          priority
+                        />
+                        <h1>
+                          {mubiIsLoading
+                            ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                            : hasRatingMubi
+                              ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
+                              : null}
+                        </h1>
+                      </div>
+                    </a>
+                  )}
+                </div>
+              </div>
+              {jwIsLoading ? (
+                <Image
+                  src="/icons/loading-spinner.gif"
+                  className='mt-7'
+                  width={50}
+                  height={50}
+                  alt="Loading Spinner"
+                  unoptimized
+                />
+              ) : (
+                <div>
+                  <div className="flex items-center gap-x-4 my-5">
+                    <h2>Where to Watch</h2>
+                    <CountrySelector
+                      id={'countries'}
+                      open={isOpen}
+                      onToggle={() => setIsOpen(!isOpen)}
+                      onChange={val => setCountry(val)}
+                      selectedValue={selectedCountry as SelectMenuOption}
+                    />
+                  </div>
+
+                  {jwError || !services || (
+                    (!services.stream?.length &&
+                      !services.rent?.length &&
+                      !services.buy?.length)
+                  ) || !hasJwData ? (
+                    <p className="my-4">
+                      No offers available for {selectedCountry?.title ?? "your country"}.
+                    </p>
+                  ) : (
+                    <div className="space-y-7">
+                      {/* Stream */}
+                      {services?.stream?.length > 0 && (
+                        <div className="flex items-start">
+                          <p className="py-6 w-20 shrink-0">Stream</p>
+                          <div className="flex flex-wrap gap-x-7 gap-y-4">
+                            {services.stream.map((service, i) => (
+                              <a
+                                href={service?.url}
+                                key={`stream-${i}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex flex-col items-center w-[70px] text-center"
+                              >
+                                <Image
+                                  src={service.package.icon}
+                                  className="rounded-[10px]"
+                                  width={70}
+                                  height={70}
+                                  alt={`${service.package.name} Logo`}
+                                />
+                                <span className="mt-2">
+                                  {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${service.monetization_type === "FLATRATE" ? "Subs" : "Ads"}`}
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Rent */}
+                      {services?.rent?.length > 0 && (
+                        <div className="flex items-start">
+                          <p className="py-6 w-20 shrink-0">Rent</p>
+
+                          <div className="flex flex-wrap gap-x-7 gap-y-4">
+                            {services.rent.map((service, i) => (
+                              <a
+                                href={service.url}
+                                key={`rent-${i}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex flex-col items-center w-[70px] text-center"
+                              >
+                                <Image
+                                  src={service.package.icon}
+                                  className="rounded-[10px]"
+                                  width={70}
+                                  height={70}
+                                  alt={`${service.package.name} Logo`}
+                                />
+                                <span className="text-sm mt-2">
+                                  {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Buy */}
+                      {services?.buy?.length > 0 && (
+                        <div className="flex items-start">
+                          <p className="py-6 w-20 shrink-0">Buy</p>
+
+                          <div className="flex flex-wrap gap-x-7 gap-y-4">
+                            {services.buy.map((service, i) => (
+                              <a
+                                href={service.url}
+                                key={`buy-${i}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex flex-col items-center w-[70px] text-center"
+                              >
+                                <Image
+                                  src={service.package.icon}
+                                  className="rounded-[10px]"
+                                  width={70}
+                                  height={70}
+                                  alt={`${service.package.name} Logo`}
+                                />
+                                <span className="mt-2">
+                                  {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {data?.name && (
+          <div>
+            <div>
+              {posterUrl && (
+                <Image
+                  src={posterUrl}
+                  alt="Poster"
+                  width={300}
+                  height={444}
+                  priority
+                />
+              )}
+              <div>
+                {data.genres.length > 0 && data.genres.map((genre, id) => {
+                  return (
+                    <p key={id}>{genre.name}</p>
+                  )
+                })
+                }
+              </div>
+              {trailerUrl && (
+                <a href={trailerUrl}>
+                  <Image
+                    src="/icons/play-button-icon.svg"
+                    width={24}
+                    height={24}
+                    alt="Play Button Icon"
+                  />
+                  <h2>Play Trailer</h2>
+                  <Image
+                    src="/icons/arrow-right.svg"
+                    width={13}
+                    height={7}
+                    alt="Right Arrow"
+                  />
+                </a>
+              )}
+            </div>
+            <div>
+              <div>
+                <h1>
+                  {data.name}
+                </h1>
+                <h1>
+                  {count > -1
+                    ? count === 0
+                      ? "N/A"
+                      : `${uniscore}`
+                    : <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />}
+                </h1>
+              </div>
+              <p>
+                {`
+                ${yearRange !== '' ? ` ${yearRange}` : ''}
+                ${data.genres.length > 0 ? ` • ${data.genres[0].name}` : ''}
+                ${data?.number_of_seasons > 0
+                    ? ` • ${data.number_of_seasons} season${data.number_of_seasons > 1 ? 's' : ''}`
+                    : ''
+                  }
+              `}
+              </p>
+              <p>
+                {creator.length > 0 ? `Created by ${creator.join(", ")}` : ''}
+              </p>
+              <p>
+                {data.tagline ? data.tagline : ""}
+              </p>
+              <div>
+                <div>
+                  {!omdbError && shouldRenderOmdb && (
+                    <>
+                      {/* IMDb */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                            alt="IMDb Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && (
                         <div>
                           <Image
                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
@@ -483,66 +809,60 @@ export default function MovieOrTvPage() {
                           />
                           <h1>{omdbData.imdbRating}</h1>
                         </div>
-                      </a>
-                    )}
+                      )}
 
-                    {/* Metacritic */}
-                    {omdbIsLoading ? (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="Metacritic Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                      </div>
-                    ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="Metacritic Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{omdbData.Metascore}</h1>
-                      </div>
-                    )}
+                      {/* Metacritic */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            alt="IMDb Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            alt="IMDb Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <h1>{omdbData.Metascore}</h1>
+                        </div>
+                      )}
 
-                    {/* Rotten Tomatoes */}
-                    {omdbIsLoading ? (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                          alt="Rotten Tomatoes Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                      </div>
-                    ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
-                      <div key={index}>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                          alt="Rotten Tomatoes Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{rating.Value}</h1>
-                      </div>
-                    )}
-                  </>
-                )}
-                {!lbError && shouldRenderLb && (
-                  <a
-                    href={lbData?.film?.link ?? "#"}
-                    target='_blank'
-                    rel="noopener noreferrer"
-                  >
+                      {/* Rotten Tomatoes */}
+                      {omdbIsLoading ? (
+                        <div>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            alt="Rotten Tomatoes Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                        </div>
+                      ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
+                        <div key={index}>
+                          <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            alt="Rotten Tomatoes Logo"
+                            width={70}
+                            height={70}
+                            priority
+                          />
+                          <h1>{rating.Value}</h1>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {!lbError && shouldRenderLb && (
                     <div>
                       <Image
                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
@@ -556,18 +876,11 @@ export default function MovieOrTvPage() {
                           hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
                       </h1>
                     </div>
-                  </a>
-                )}
-                {!mubiError && shouldRenderMubi && (
-                  <a
-                    href={mubiData?.url ?? '#'}
-                    target='_blank'
-                    rel="noopener noreferrer"
-                  >
+                  )}
+                  {!mubiError && shouldRenderMubi && (
                     <div>
                       <Image
                         src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
-                        className='rounded-[10px]'
                         alt="Mubi Logo"
                         width={70}
                         height={70}
@@ -581,426 +894,116 @@ export default function MovieOrTvPage() {
                             : null}
                       </h1>
                     </div>
-                  </a>
-                )}
-              </div>
-            </div>
-            {jwIsLoading ? (
-              <Image
-                src="/icons/loading-spinner.gif" 
-                className='mt-7'
-                width={50}
-                height={50}
-                alt="Loading Spinner"
-                unoptimized
-              />
-            ) : (
-              <div>
-                <div className="flex items-center gap-x-4 my-5">
-                  <h2>Where to Watch</h2>
-                  <CountrySelector
-                    id={'countries'}
-                    open={isOpen}
-                    onToggle={() => setIsOpen(!isOpen)}
-                    onChange={val => setCountry(val)}
-                    selectedValue={selectedCountry as SelectMenuOption}
-                  />
-                </div>
-
-                {jwError || !services || (
-                  (!services.stream?.length &&
-                    !services.rent?.length &&
-                    !services.buy?.length)
-                ) || !hasJwData ? (
-                  <p className="my-4">
-                    No offers available for {selectedCountry?.title ?? "your country"}.
-                  </p>
-                ) : (
-                  <div className="space-y-7">
-                    {/* Stream */}
-                    {services?.stream?.length > 0 && (
-                      <div className="flex items-start">
-                        <p className="py-6 w-20 shrink-0">Stream</p>
-                        <div className="flex flex-wrap gap-x-7 gap-y-4">
-                          {services.stream.map((service, i) => (
-                            <a
-                              href={service?.url}
-                              key={`stream-${i}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center w-[70px] text-center"
-                            >
-                              <Image
-                                src={service.package.icon}
-                                className="rounded-[10px]"
-                                width={70}
-                                height={70}
-                                alt={`${service.package.name} Logo`}
-                              />
-                              <span className="mt-2">
-                                {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${service.monetization_type === "FLATRATE" ? "Subs" : "Ads"}`}
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Rent */}
-                    {services?.rent?.length > 0 && (
-                      <div className="flex items-start">
-                        <p className="py-6 w-20 shrink-0">Rent</p>
-
-                        <div className="flex flex-wrap gap-x-7 gap-y-4">
-                          {services.rent.map((service, i) => (
-                            <a
-                              href={service.url}
-                              key={`rent-${i}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center w-[70px] text-center"
-                            >
-                              <Image
-                                src={service.package.icon}
-                                className="rounded-[10px]"
-                                width={70}
-                                height={70}
-                                alt={`${service.package.name} Logo`}
-                              />
-                              <span className="text-sm mt-2">
-                                {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Buy */}
-                    {services?.buy?.length > 0 && (
-                      <div className="flex items-start">
-                        <p className="py-6 w-20 shrink-0">Buy</p>
-
-                        <div className="flex flex-wrap gap-x-7 gap-y-4">
-                          {services.buy.map((service, i) => (
-                            <a
-                              href={service.url}
-                              key={`buy-${i}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center w-[70px] text-center"
-                            >
-                              <Image
-                                src={service.package.icon}
-                                className="rounded-[10px]"
-                                width={70}
-                                height={70}
-                                alt={`${service.package.name} Logo`}
-                              />
-                              <span className="mt-2">
-                                {`${service.presentation_type === "_4K" ? "4K" : service.presentation_type === "HD" ? "HD" : "SD"} • ${formatPrice(service.price_value, service.price_currency)}`}
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {data?.name && (
-        <div>
-          <div>
-            {posterUrl && (
-              <Image
-                src={posterUrl}
-                alt="Poster"
-                width={300}
-                height={444}
-                priority
-              />
-            )}
-            <div>
-              {data.genres.length > 0 && data.genres.map((genre, id) => {
-                return (
-                  <p key={id}>{genre.name}</p>
-                )
-              })
-              }
-            </div>
-            {trailerUrl && (
-              <a href={trailerUrl}>
-                <Image
-                  src="/icons/play-button-icon.svg"
-                  width={24}
-                  height={24}
-                  alt="Play Button Icon"
-                />
-                <h2>Play Trailer</h2>
-                <Image
-                  src="/icons/arrow-right.svg"
-                  width={13}
-                  height={7}
-                  alt="Right Arrow"
-                />
-              </a>
-            )}
-          </div>
-          <div>
-            <div>
-              <h1>
-                {data.name}
-              </h1>
-              <h1>
-                {count > -1
-                  ? count === 0
-                    ? "N/A"
-                    : `${uniscore}`
-                  : <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />}
-              </h1>
-            </div>
-            <p>
-              {`
-                ${yearRange !== '' ? ` ${yearRange}` : ''}
-                ${data.genres.length > 0 ? ` • ${data.genres[0].name}` : ''}
-                ${data?.number_of_seasons > 0
-                  ? ` • ${data.number_of_seasons} season${data.number_of_seasons > 1 ? 's' : ''}`
-                  : ''
-                }
-              `}
-            </p>
-            <p>
-              {creator.length > 0 ? `Created by ${creator.join(", ")}` : ''}
-            </p>
-            <p>
-              {data.tagline ? data.tagline : ""}
-            </p>
-            <div>
-              <div>
-                {!omdbError && shouldRenderOmdb && (
-                  <>
-                    {/* IMDb */}
-                    {omdbIsLoading ? (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                          alt="IMDb Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                      </div>
-                    ) : omdbData?.imdbRating && omdbData.imdbRating !== "N/A" && (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
-                          alt="IMDb Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{omdbData.imdbRating}</h1>
-                      </div>
-                    )}
-
-                    {/* Metacritic */}
-                    {omdbIsLoading ? (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="IMDb Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                      </div>
-                    ) : omdbData?.Metascore && omdbData.Metascore !== "N/A" && (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
-                          alt="IMDb Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{omdbData.Metascore}</h1>
-                      </div>
-                    )}
-
-                    {/* Rotten Tomatoes */}
-                    {omdbIsLoading ? (
-                      <div>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                          alt="Rotten Tomatoes Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                      </div>
-                    ) : omdbData?.Ratings?.map((rating, index) => rating.Source === "Rotten Tomatoes" &&
-                      <div key={index}>
-                        <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
-                          alt="Rotten Tomatoes Logo"
-                          width={70}
-                          height={70}
-                          priority
-                        />
-                        <h1>{rating.Value}</h1>
-                      </div>
-                    )}
-                  </>
-                )}
-                {!lbError && shouldRenderLb && (
-                  <div>
-                    <Image
-                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
-                      alt="Letterboxd Logo"
-                      width={70}
-                      height={70}
-                      priority
-                    />
-                    <h1>
-                      {lbIsLoading ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized /> :
-                        hasRatingLb && lbData?.film?.rating ? ` ${lbData.film.rating.toFixed(1)}` : null}
-                    </h1>
-                  </div>
-                )}
-                {!mubiError && shouldRenderMubi && (
-                  <div>
-                    <Image
-                      src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
-                      alt="Mubi Logo"
-                      width={70}
-                      height={70}
-                      priority
-                    />
-                    <h1>
-                      {mubiIsLoading
-                        ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        : hasRatingMubi
-                          ? ` ${filmDataMubi.average_rating_out_of_ten?.toFixed(1)}`
-                          : null}
-                    </h1>
-                  </div>
-                )}
-                {!serializdError && shouldRenderSerializd && (
-                  <div>
-                    <Image
-                      src="https://media.imgcdn.org/repo/2024/02/serializd/65cb301c74859-serializd-Icon.webp"
-                      alt="Serializd Logo"
-                      width={70}
-                      height={70}
-                      priority
-                    />
-                    <h1>
-                      {serializdIsLoading
-                        ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
-                        : hasRatingSerializd
-                          ? ` ${filmDataSerializd.ratingValue}`
-                          : null}
-                    </h1>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <h2>Where to Watch (US)</h2>
-              <div>
-                {/* <Image /> */}
-                <div></div> {/* flag */}
-                <p>US</p>
-                {/* <Image /> */}
-                <div></div> {/* dropdown icon */}
-              </div>
-            </div>
-            <div>
-              {/* Stream */}
-              {services?.stream?.length > 0 && (
-                <div>
-                  <p>Stream</p>
-                  {services.stream.map((service, i) => (
-                    <a href={service?.url} key={i} target='_blank'>
+                  )}
+                  {!serializdError && shouldRenderSerializd && (
+                    <div>
                       <Image
-                        src={service.package.icon}
+                        src="https://media.imgcdn.org/repo/2024/02/serializd/65cb301c74859-serializd-Icon.webp"
+                        alt="Serializd Logo"
                         width={70}
                         height={70}
-                        alt={`${service.package.name} Logo`}
+                        priority
                       />
-                      <p>
-                        {`${service.presentation_type === "_4K"
-                          ? "4K"
-                          : service.presentation_type === "HD"
-                            ? "HD"
-                            : "SD"
-                          } • ${service.monetization_type === "FLATRATE" ? "Subs" : "Ads"
-                          }`}
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              )}
-              {/* Rent */}
-              {services?.rent?.length > 0 && (
-                <div>
-                  <p>Rent</p>
-                  {services.rent.map((service, i) => (
-                    <a href={service.url} key={i} target='_blank'>
-                      <Image
-                        src={service.package.icon}
-                        width={70}
-                        height={70}
-                        alt={`${service.package.name} Logo`}
-                      />
-                      <p>
-                        {`${service.presentation_type === "_4K"
-                          ? "4K"
-                          : service.presentation_type === "HD"
-                            ? "HD"
-                            : "SD"
-                          } • ${formatPrice(service.price_value, service.price_currency)}`}
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              )}
-              {/* Buy */}
-              {services?.buy?.length > 0 && (
-                <div>
-                  <p>Buy</p>
-                  {services.buy.map((service, i) => (
-                    <div key={i}>
-                      <Image
-                        src={service.package.icon}
-                        width={70}
-                        height={70}
-                        alt={`${service.package.name} Logo`}
-                      />
-                      <p>
-                        {`${service.presentation_type === "_4K"
-                          ? "4K"
-                          : service.presentation_type === "HD"
-                            ? "HD"
-                            : "SD"
-                          } • ${formatPrice(service.price_value, service.price_currency)}`}
-                      </p>
+                      <h1>
+                        {serializdIsLoading
+                          ? <Image src="/icons/loading-spinner.gif" width={50} height={50} alt="Loading Spinner" unoptimized />
+                          : hasRatingSerializd
+                            ? ` ${filmDataSerializd.ratingValue}`
+                            : null}
+                      </h1>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+              </div>
+              <div>
+                <h2>Where to Watch (US)</h2>
+                <div>
+                  {/* <Image /> */}
+                  <div></div> {/* flag */}
+                  <p>US</p>
+                  {/* <Image /> */}
+                  <div></div> {/* dropdown icon */}
+                </div>
+              </div>
+              <div>
+                {/* Stream */}
+                {services?.stream?.length > 0 && (
+                  <div>
+                    <p>Stream</p>
+                    {services.stream.map((service, i) => (
+                      <a href={service?.url} key={i} target='_blank'>
+                        <Image
+                          src={service.package.icon}
+                          width={70}
+                          height={70}
+                          alt={`${service.package.name} Logo`}
+                        />
+                        <p>
+                          {`${service.presentation_type === "_4K"
+                            ? "4K"
+                            : service.presentation_type === "HD"
+                              ? "HD"
+                              : "SD"
+                            } • ${service.monetization_type === "FLATRATE" ? "Subs" : "Ads"
+                            }`}
+                        </p>
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {/* Rent */}
+                {services?.rent?.length > 0 && (
+                  <div>
+                    <p>Rent</p>
+                    {services.rent.map((service, i) => (
+                      <a href={service.url} key={i} target='_blank'>
+                        <Image
+                          src={service.package.icon}
+                          width={70}
+                          height={70}
+                          alt={`${service.package.name} Logo`}
+                        />
+                        <p>
+                          {`${service.presentation_type === "_4K"
+                            ? "4K"
+                            : service.presentation_type === "HD"
+                              ? "HD"
+                              : "SD"
+                            } • ${formatPrice(service.price_value, service.price_currency)}`}
+                        </p>
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {/* Buy */}
+                {services?.buy?.length > 0 && (
+                  <div>
+                    <p>Buy</p>
+                    {services.buy.map((service, i) => (
+                      <div key={i}>
+                        <Image
+                          src={service.package.icon}
+                          width={70}
+                          height={70}
+                          alt={`${service.package.name} Logo`}
+                        />
+                        <p>
+                          {`${service.presentation_type === "_4K"
+                            ? "4K"
+                            : service.presentation_type === "HD"
+                              ? "HD"
+                              : "SD"
+                            } • ${formatPrice(service.price_value, service.price_currency)}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Container>
     </div>
   );
 }
