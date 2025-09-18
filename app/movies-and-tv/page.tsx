@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from "next/navigation";
-import Link from 'next/link';
-import Image from "next/image";
-import SearchBar from '@/components/SearchBar';
 import axios from 'axios';
 import { TMDbResults } from '@/types/tmdb';
+import Navbar from '@/components/Navbar';
+import Container from '@/components/Container';
+import SearchBar from '@/components/SearchBar';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function MoviesAndTv() {
   const [results, setResults] = useState<TMDbResults[]>([]);
@@ -31,36 +33,37 @@ export default function MoviesAndTv() {
   };
 
   return (
-    <>
-      <div className="logo-container">
-        <Image
-          src="/icons/unicritic-logo.svg"
-          alt="Unicritic Logo"
-          width={39}
-          height={44}
-          priority
-        />
-        <Link href={"/movies-and-tv"}>
-          <h1>Unicritic</h1>
-        </Link>
-      </div>
-      <div>
-        <nav>
-          <ul>
-            <li><Link href={"/movies-and-tv"}>Movies/TV</Link></li>
+    <div>
+      <Container className='flex items-center justify-center h-screen flex-col gap-y-5'>
+        <nav className="absolute top-10">
+          <ul className="flex justify-end items-center gap-x-5">
+            <li><Link className="font-bold" href={"/movies-and-tv"}>Movies & TV</Link></li>
             <li><Link href={"/music"}>Music</Link></li>
-            <li><Link href={"/game"}>Games</Link></li>
-            <li><Link href={"/book"}>Books</Link></li>
+            <li><Link href={"/games"}>Games</Link></li>
+            <li><Link href={"/books"}>Books</Link></li>
           </ul>
         </nav>
-      </div>
-      <SearchBar
-        type={"movies-and-tv"}
-        goToDetails={goToDetails}
-        results={results}
-        setResults={setResults}
-        fetchResults={fetchResults}
-      />
-    </>
+        <Link href={"/movies-and-tv"} className="flex items-center gap-x-3">
+          <Image
+            src="/icons/unicritic-logo.svg"
+            alt="Unicritic Logo"
+            width={39}
+            height={44}
+            priority
+          />
+          <h1>Unicritic</h1>
+        </Link>
+        <div className='max-w-85 w-full my-1'>
+          <SearchBar
+            page={"movies-and-tv"}
+            goToDetails={goToDetails}
+            results={results}
+            setResults={setResults}
+            fetchResults={fetchResults}
+          />
+        </div>
+        <p className='mt-5 lg:mt-0 text-center'>Your universal critic. Instantly compare ratings.</p>
+      </Container>
+    </div>
   );
 }

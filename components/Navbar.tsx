@@ -5,7 +5,7 @@ import Link from "next/link";
 import SearchBar from "./SearchBar";
 import { useState } from "react";
 
-export default function Navbar({ page, goToDetails, results, setResults, fetchResults }) {
+export default function Navbar({ page = "", goToDetails, results, setResults, fetchResults }) {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
@@ -60,8 +60,8 @@ export default function Navbar({ page, goToDetails, results, setResults, fetchRe
         <ul className="flex justify-end items-center gap-x-5">
           <li><Link className={page === "movies-and-tv" ? "font-bold" : ""} href={"/movies-and-tv"}>Movies & TV</Link></li>
           <li><Link className={page === "music" ? "font-bold" : ""} href={"/music"}>Music</Link></li>
-          <li><Link className={page === "games" ? "font-bold" : ""} href={"/game"}>Games</Link></li>
-          <li><Link className={page === "books" ? "font-bold" : ""} href={"/book"}>Books</Link></li>
+          <li><Link className={page === "games" ? "font-bold" : ""} href={"/games"}>Games</Link></li>
+          <li><Link className={page === "books" ? "font-bold" : ""} href={"/books"}>Books</Link></li>
         </ul>
       </nav>
     </div>

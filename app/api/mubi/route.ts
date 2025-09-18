@@ -68,11 +68,19 @@ const getNextData = async (match) => {
   const url = match.canonical_url;
   const getHtmlContent = async (url: string) => {
     try {
-      const { data } = await axios.get(url);
+      const { data } = await axios.get(url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+        timeout: 10000,
+      });
       return data;
     } catch (error) {
-      console.error('Error fetching HTML', error);
-      return null;
+      const status = error?.response?.status ?? 502;
+      const message = error?.message ?? "Failed to fetch HTML";
+      throw { status, message, original: err };
     }
   };
   const htmlString = await getHtmlContent(url);
@@ -89,6 +97,7 @@ const getNextData = async (match) => {
 };
 
 export async function GET(req: NextRequest) {
+  try {
   const title = req.nextUrl.searchParams.get('title');
   const director = req.nextUrl.searchParams.get('director');
   const year = Number(req.nextUrl.searchParams.get('year'));
@@ -103,10 +112,20 @@ export async function GET(req: NextRequest) {
   } else {
     match = await searchMubi(title, director, year);
   }
-  if (match) {
-    const mubiData = await getNextData(match);
-    return NextResponse.json(mubiData);
-  } else {
+  if (!match) {
     return NextResponse.json({ error: "Movie not found" }, { status: 404 });
   }
+  try {
+    const mubiData = await getNextData(match);
+    return NextResponse.json(mubiData);
+  } catch (error: any) {
+    console.error("Error when fetching Mubi page:", error);
+    const status = error?.status ?? 502;
+    const message = error?.message ?? "Failed to fetch MUBI page";
+    return NextResponse.json({ error: message }, { status });
+  }
+  } catch (error: any) {
+    console.error("Unexpected error in /api/mubi:", error);
+    return NextResponse.json({ error: error?.message ?? "Internal server error" }, { status: 500 });
+  } 
 }
