@@ -83,7 +83,7 @@ export default function SearchBar({
       </div>
 
       {isFocused && results.length > 0 && (
-        <div className="absolute top-full left-0 z-50 max-h-96 w-full overflow-auto rounded-[10px] border border-[#606060] bg-[#18191D]">
+        <div className="absolute top-full left-0 z-50 max-h-96 w-full overflow-auto rounded-[10px] border border-[#606060] bg-[#18191D] scrollbar-custom">
           {page === "movies-and-tv" &&
             results.length > 0 &&
             results.map((result: TMDbResults) => {

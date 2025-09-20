@@ -149,7 +149,7 @@ export default function CountrySelector({
 
               <div
                 className={
-                  "scrollbar scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-thin max-h-64 overflow-y-scroll"
+                  "scrollbar scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-600 scrollbar-thumb-rounded scrollbar-thin max-h-64 overflow-y-scroll scrollbar-custom"
                 }
               >
                 {COUNTRIES.filter((country) =>

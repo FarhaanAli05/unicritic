@@ -67,7 +67,7 @@ export default function MoviesAndTv() {
           />
           <h1>Unicritic</h1>
         </Link>
-        <div className="my-1 w-full max-w-85">
+        <div className="w-full max-w-85">
           <SearchBar
             page={"movies-and-tv"}
             goToDetails={goToDetails}
