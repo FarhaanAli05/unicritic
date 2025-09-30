@@ -303,16 +303,14 @@ export default function MovieOrTvPage() {
   interface MubiData {
     nextData?: {
       props?: {
-        initialProps?: {
-          pageProps?: {
-            initFilm?: {
-              average_rating_out_of_ten?: number;
-              number_of_ratings?: number;
-            };
-            series?: {
-              average_rating_out_of_ten?: number;
-              number_of_ratings?: number;
-            };
+        pageProps?: {
+          initFilm?: {
+            average_rating_out_of_ten?: number;
+            number_of_ratings?: number;
+          };
+          series?: {
+            average_rating_out_of_ten?: number;
+            number_of_ratings?: number;
           };
         };
       };
@@ -334,8 +332,8 @@ export default function MovieOrTvPage() {
     { shouldRetryOnError: false },
   );
   const filmDataMubi =
-    mubiData?.nextData?.props?.initialProps?.pageProps?.initFilm ||
-    mubiData?.nextData?.props?.initialProps?.pageProps?.series;
+    mubiData?.nextData?.props?.pageProps?.initFilm ||
+    mubiData?.nextData?.props?.pageProps?.series;
   const hasRatingMubi = filmDataMubi?.average_rating_out_of_ten != null;
   const shouldRenderMubi = mubiIsLoading || hasRatingMubi;
 
