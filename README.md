@@ -1,6 +1,7 @@
 # 🎬 Unicritic
 
 Unicritic is a **Next.js web application** that aggregates ratings and reviews from **multiple platforms** - including IMDb, Rotten Tomatoes, Letterboxd, and others - into a single unified score called the **“Uniscore.”**  
+
 The app lets users quickly see how a movie or TV show is received across different review sources, along with streaming availability, trailers, and direct links to each platform.
 
 ![Unicritic Screenshot - The Godfather Page](./public/images/unicritic-godfather-page.png)
@@ -21,6 +22,7 @@ The app lets users quickly see how a movie or TV show is received across differe
 ## 🧠 Inspiration
 
 Finding consistent movie ratings across platforms is tedious - some prefer IMDb, others use Rotten Tomatoes, and newer users follow Letterboxd or MUBI.  
+
 **Unicritic** solves this by merging all sources into a single score and clean interface, helping users decide what to watch without platform-hopping.
 
 ---
