@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎬 Unicritic
 
-## Getting Started
+Unicritic is a **Next.js web application** that aggregates ratings and reviews from **multiple platforms** - including IMDb, Rotten Tomatoes, Letterboxd, and others - into a single unified score called the **“Uniscore.”**  
+The app lets users quickly see how a movie or TV show is received across different review sources, along with streaming availability, trailers, and direct links to each platform.
 
-First, run the development server:
+![Unicritic Screenshot - The Godfather Page](./public/images/unicritic-godfather-page.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌟 Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 📊 **Unified Rating System (Uniscore):** Combines ratings from various platforms into one weighted average  
+- 🔍 **Cross-Platform Aggregation:** Gathers data from IMDb, Rotten Tomatoes, Letterboxd, and more using web scraping and private APIs  
+- 🌍 **Streaming Availability:** Displays where to stream content by country via the JustWatch API wrapper  
+- 🎥 **Interactive Experience:** Includes trailers, review links, and streaming site redirects  
+- ⚡ **Optimized Data Fetching:** Built with SWR and Axios for fast, cache-friendly performance  
+- 📱 **Responsive Design:** Clean, adaptive layout for both desktop and mobile users  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧠 Inspiration
 
-To learn more about Next.js, take a look at the following resources:
+Finding consistent movie ratings across platforms is tedious - some prefer IMDb, others use Rotten Tomatoes, and newer users follow Letterboxd or MUBI.  
+**Unicritic** solves this by merging all sources into a single score and clean interface, helping users decide what to watch without platform-hopping.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🏗️ Tech Stack
 
-## Deploy on Vercel
+**Frontend:** Next.js, React, Tailwind CSS  
+**Data Handling:** Axios, SWR, Cheerio (for scraping)  
+**APIs:** TMDb API, JustWatch API (Node.js wrapper)  
+**Other Tools:** Node.js, Vercel (hosting)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚙️ Setup & Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/FarhaanAli05/unicritic.git
+   cd unicritic
+
+2. **Install dependencies**
+   ```bash
+   npm install
+
+3. **Create a .env.local file in the root directory and add your API keys:**
+   ```bash
+   TMDB_API_KEY=your_tmdb_key_here
+
+4. Run the development server
+   ```bash
+   npm run dev
+
+5. **Visit http://localhost:3000 to explore Unicritic locally.**
+
+---
+
+## 📚 Future Enhancements
+
+- Extend Unicritic beyond movies and TV shows to include **music, games, and books**, each with their own unified “Uniscore”
+- Implement a **database layer** for caching, user profiles, and saved favorites
+- Add a **main dashboard** showcasing trending and top-rated content across all categories
+- Introduce a **Unicritic Top 250 page** highlighting the highest-rated movies based on aggregated scores
+- Explore advanced **filtering and search features** (by genre, platform, or region) for deeper content discovery
+
+---
+
+## 🤝 Contributing
+
+Pull requests and suggestions are welcome!
+
+If you would like to contribute a feature or fix a bug:
+1. Fork the repo
+2. Create a new branch (```git checkout -b feature-name```)
+3. Commit changes and open a PR
+
+---
+
+## 🧑‍💻 Author
+
+**Farhaan Ali**
+
+Computing @ Queen’s University
+
+[LinkedIn](https://www.linkedin.com/in/farhaan-ali/) · [Portfolio (coming soon)](#) · [GitHub](https://github.com/FarhaanAli05)
