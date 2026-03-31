@@ -14,8 +14,8 @@
     "framer-motion": "^12.23.13",
     "next": "15.4.10",
     "puppeteer": "^24.15.0",
-    "react": "19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "swr": "^2.3.6"
   },
   "devDependencies": {
