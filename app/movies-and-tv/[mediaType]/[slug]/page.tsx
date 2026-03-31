@@ -572,7 +572,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                            src="/icons/imdb.webp"
                             alt="IMDb Logo"
                             width={70}
                             height={70}
@@ -597,7 +597,7 @@ export default function MovieOrTvPage() {
                           >
                             <div>
                               <Image
-                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                                src="/icons/imdb.webp"
                                 alt="IMDb Logo"
                                 width={70}
                                 height={70}
@@ -613,7 +613,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            src="/icons/metacritic.webp"
                             alt="Metacritic Logo"
                             width={70}
                             height={70}
@@ -632,7 +632,7 @@ export default function MovieOrTvPage() {
                         omdbData.Metascore !== "N/A" && (
                           <div>
                             <Image
-                              src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                              src="/icons/metacritic.webp"
                               alt="Metacritic Logo"
                               width={70}
                               height={70}
@@ -647,7 +647,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            src="/icons/rotten-tomatoes.webp"
                             alt="Rotten Tomatoes Logo"
                             width={70}
                             height={70}
@@ -667,7 +667,7 @@ export default function MovieOrTvPage() {
                             rating.Source === "Rotten Tomatoes" && (
                               <div key={index}>
                                 <Image
-                                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                                  src="/icons/rotten-tomatoes.webp"
                                   alt="Rotten Tomatoes Logo"
                                   width={70}
                                   height={70}
@@ -688,7 +688,7 @@ export default function MovieOrTvPage() {
                     >
                       <div>
                         <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                          src="/icons/letterboxd.webp"
                           alt="Letterboxd Logo"
                           width={70}
                           height={70}
@@ -718,7 +718,7 @@ export default function MovieOrTvPage() {
                     >
                       <div>
                         <Image
-                          src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                          src="/icons/mubi.webp"
                           className="rounded-[10px]"
                           alt="Mubi Logo"
                           width={70}
@@ -987,7 +987,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                            src="/icons/imdb.webp"
                             alt="IMDb Logo"
                             width={70}
                             height={70}
@@ -1012,7 +1012,7 @@ export default function MovieOrTvPage() {
                           >
                             <div>
                               <Image
-                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/128px-IMDb_Logo_Square.svg.png"
+                                src="/icons/imdb.webp"
                                 alt="IMDb Logo"
                                 width={70}
                                 height={70}
@@ -1028,7 +1028,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                            src="/icons/metacritic.webp"
                             alt="Metacritic Logo"
                             width={70}
                             height={70}
@@ -1047,7 +1047,7 @@ export default function MovieOrTvPage() {
                         omdbData.Metascore !== "N/A" && (
                           <div>
                             <Image
-                              src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Metacritic_M.png"
+                              src="/icons/metacritic.webp"
                               alt="Metacritic Logo"
                               width={70}
                               height={70}
@@ -1062,7 +1062,7 @@ export default function MovieOrTvPage() {
                       {omdbIsLoading ? (
                         <div>
                           <Image
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                            src="/icons/rotten-tomatoes.webp"
                             alt="Rotten Tomatoes Logo"
                             width={70}
                             height={70}
@@ -1082,7 +1082,7 @@ export default function MovieOrTvPage() {
                             rating.Source === "Rotten Tomatoes" && (
                               <div key={index}>
                                 <Image
-                                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Rotten_Tomatoes.svg/237px-Rotten_Tomatoes.svg.png"
+                                src="/icons/rotten-tomatoes.webp"
                                   alt="Rotten Tomatoes Logo"
                                   width={70}
                                   height={70}
@@ -1103,7 +1103,7 @@ export default function MovieOrTvPage() {
                     >
                       <div>
                         <Image
-                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Letterboxd_2023_logo.png/500px-Letterboxd_2023_logo.png"
+                          src="/icons/letterboxd.webp"
                           alt="Letterboxd Logo"
                           width={70}
                           height={70}
@@ -1133,7 +1133,7 @@ export default function MovieOrTvPage() {
                     >
                       <div>
                         <Image
-                          src="https://yt3.googleusercontent.com/ytc/AIdro_mWJBgDplMrbUXtqSqE2RJcgHEsfQtT1DJK6AtAqwYtML4=s900-c-k-c0x00ffffff-no-rj"
+                          src="/icons/mubi.webp"
                           className="rounded-[10px]"
                           alt="Mubi Logo"
                           width={70}
@@ -1164,7 +1164,7 @@ export default function MovieOrTvPage() {
                     >
                       <div>
                         <Image
-                          src="https://media.imgcdn.org/repo/2024/02/serializd/65cb301c74859-serializd-Icon.webp"
+                          src="/icons/serializd.webp"
                           alt="Serializd Logo"
                           width={70}
                           height={70}
