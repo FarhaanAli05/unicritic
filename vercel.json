@@ -1,0 +1,15 @@
+{
+    "redirects": [
+      {
+        "source": "/(.*)",
+        "has": [
+          {
+            "type": "host",
+            "value": "unicritic.vercel.app"
+          }
+        ],
+        "destination": "https://unicritic.app/$1",
+        "permanent": true
+      }
+    ]
+  }
