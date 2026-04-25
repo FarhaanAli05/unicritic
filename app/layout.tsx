@@ -10,14 +10,26 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://unicritic.app"),
   title: "Unicritic",
-  description: "All ratings in one place. IMDb, Rotten Tomatoes, Metacritic, and more.",
+  description:
+    "All ratings in one place. IMDb, Rotten Tomatoes, Metacritic, Letterboxd, and more.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Unicritic",
-    description: "All ratings in one place. IMDb, Rotten Tomatoes, Metacritic, and more.",
-    url: "https://unicritic.app",
+    description:
+      "All ratings in one place. IMDb, Rotten Tomatoes, Metacritic, Letterboxd, and more.",
+    url: "/",
     siteName: "Unicritic",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Unicritic",
+    description:
+      "All ratings in one place. IMDb, Rotten Tomatoes, Metacritic, Letterboxd, and more.",
   },
 };
 
